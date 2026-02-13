@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>MaxSkins App — Scorekeeper Screen (Locked Spec)</title>
+  <meta name="description" content="MaxSkins Phase 1 — Scorekeeper/Scoring Screen hard-locked architecture and rules." />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body data-page="app-scorekeeper">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="topbar" role="banner">
+    <div class="wrap topbar__inner">
+      <div class="brand">
+        <a class="brand__link" href="/" aria-label="MaxSkins Home">
+          <span class="brand__mark" aria-hidden="true">⛳</span>
+          <span class="brand__word">MaxSkins</span>
+          <span class="brand__tag">Better Golf, Smarter Bets</span>
+        </a>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="nav__link is-active" href="/">Home</a>
+        <a class="nav__link" href="/features/">Features</a>
+        <a class="nav__link" href="/rules/">Rules</a>
+        <a class="nav__link" href="/pricing/">Pricing</a>
+        <a class="nav__link" href="/app/">App</a>
+        <a class="nav__link" href="/contact/">Contact</a>
+      </nav>
+
+      <div class="topbar__actions">
+        <a class="btn btn--ghost" href="/contact/">Get Updates</a>
+        <a class="btn btn--primary" href="features.html#try">Try Demo</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="main" style="padding-top:24px;">
+    <section class="hero">
+      <h1 class="hero__title">Scorekeeper Screen — Locked Spec</h1>
+      <p class="hero__subtitle">This is the authoritative spec snapshot from the hard-lock export.</p>
+      <div class="cta-row">
+        <a class="btn" href="/app/">← Back to App</a>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:18px;">
+      <h2 class="card__title">Export (verbatim)</h2>
+      <pre class="pre" style="white-space:pre-wrap; line-height:1.3;">MAXSKINS – SCORING SCREEN HARD LOCK Session Summary Export Timestamp:
+2026-02-11 19:17
+
+  ----------------------------
+  CORE UI STRUCTURE (LOCKED)
+  ----------------------------
+
+Eight identical vertical pill buttons (2 rows of 4):
+
+TOP ROW (Gameplay Stats) 1. Fairway 2. Sand 3. Green 4. Putts
+
+BOTTOM ROW (Support / Utility) 5. Penalty (Lost Ball / OB – adds
+strokes) 6. Notes (Microphone icon – full screen note entry) 7. Fairway
+AI Assistant 8. Green AI Assistant
+
+  -----------------------------
+  PILL DESIGN SYSTEM (LOCKED)
+  -----------------------------
+
+• All pills identical in size and shape. • Black base body with flat
+gold ring border. • When activated: - Ring turns solid flat gold. -
+Subtle outer glow (premium look). - Light haptic vibration feedback
+(tiny “brrt”).
+
+• Images NEVER change between states. • Only overlays change (ball
+appearance, glow, flag color, etc.).
+
+  ------------------------
+  VISUAL LOGIC – TOP ROW
+  ------------------------
+
+FAIRWAY • Base image: realistic fairway, wide cut, no flag. • On
+activation: - Small white golf ball appears (~75% toward top). - Gold
+ring activates. - Subtle vibration.
+
+SAND • Realistic bunker image (locked design). • On activation: - Small
+white golf ball appears in sand. - Gold ring activates. - Subtle
+vibration.
+
+GREEN • Aerial 30–60 yard perspective. • No hole visible in base state.
+• On activation: - Small white golf ball appears centered. - Gold ring
+activates. - Subtle vibration.
+
+PUTTS • Flagstick centered vertically. • Small hole visible. • No ball
+in base state. • Clicking cycles putt count: White flag (0) Gold flag (1
+putt) Green flag (2 putts) Red flag (3 putts) Dark red (4–5 putts max) •
+Max logical putts: 5 • After 5 → reset to white • Number displayed on
+flag. • Subtle vibration each press.
+
+  -----------------------------------
+  PENALTY SYSTEM (LOCKED DIRECTION)
+  -----------------------------------
+
+• Penalty pill adds strokes. • Lost ball / OB simplified to stroke add.
+• AI confirmation required before auto-marking. • Calm + confident UI
+tone.
+
+  --------------
+  NOTES SYSTEM
+  --------------
+
+• Microphone icon (premium look). • Full-screen modal. • Background
+blur. • Auto-save on close. • Preset quick notes suggested (water, OB,
+provisional, etc.).
+
+  --------------------------
+  AI RULES SYSTEM (LOCKED)
+  --------------------------
+
+• Located in bottom navigation (permanent but subtle). • Quiet safety
+net design. • Full-screen popup when activated. • Blurred background. •
+Presets for top common rulings: - Water hazard - Out of bounds - Lost
+ball - Provisional ball - Unplayable lie
+
+• Microphone auto-active. • “Talk to me. Tell me what happened.” •
+Clarifies before applying penalties. • Asks: “Do you want me to add this
+stroke?”
+
+  ----------------------
+  INTERACTION FEEDBACK
+  ----------------------
+
+• Ball appears on stat activation. • Flat gold ring highlight. • Tiny
+haptic vibration. • No dramatic animation. • Premium, calm, confident
+tone.
+
+  --------------------------------
+  DRIFT CONTROL (LESSON LEARNED)
+  --------------------------------
+
+• Pills remain vertical. • Image content remains fixed. • Only overlays
+change. • No redesigning shape mid-stream. • No adding/removing pills
+without structural discussion.
+
+  --------------------
+  FINAL STATE INTENT
+  --------------------
+
+Eight vertical premium pills. Clean. Identical sizing. Subtle gold
+activation. Ball overlays only. AI rules as quiet power tool. Hard-lock
+direction confirmed.
+
+END OF EXPORT
+</pre>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <small>Scorekeeper Screen spec is hard-locked. Any changes must be deliberate and versioned.</small>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>MaxSkins App — Player Screen (Locked Spec)</title>
+  <meta name="description" content="MaxSkins Phase 1 — Player Screen hard-locked architecture and rules." />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body data-page="app-player">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="topbar" role="banner">
+    <div class="wrap topbar__inner">
+      <div class="brand">
+        <a class="brand__link" href="/" aria-label="MaxSkins Home">
+          <span class="brand__mark" aria-hidden="true">⛳</span>
+          <span class="brand__word">MaxSkins</span>
+          <span class="brand__tag">Better Golf, Smarter Bets</span>
+        </a>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="nav__link is-active" href="/">Home</a>
+        <a class="nav__link" href="/features/">Features</a>
+        <a class="nav__link" href="/rules/">Rules</a>
+        <a class="nav__link" href="/pricing/">Pricing</a>
+        <a class="nav__link" href="/app/">App</a>
+        <a class="nav__link" href="/contact/">Contact</a>
+      </nav>
+
+      <div class="topbar__actions">
+        <a class="btn btn--ghost" href="/contact/">Get Updates</a>
+        <a class="btn btn--primary" href="features.html#try">Try Demo</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="main" style="padding-top:24px;">
+    <section class="hero">
+      <h1 class="hero__title">Player Screen — Locked Spec</h1>
+      <p class="hero__subtitle">This is the authoritative spec snapshot from the hard-lock export.</p>
+      <div class="cta-row">
+        <a class="btn" href="/app/">← Back to App</a>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:18px;">
+      <h2 class="card__title">Export (verbatim)</h2>
+      <pre class="pre" style="white-space:pre-wrap; line-height:1.3;">MAXSKINS – PLAYER SCREEN HARD LOCK Session Export Timestamp: 2026-02-11
+21:19
+
+============================================================ IDENTITY
+FOUNDATION (PROTECTED)
+============================================================
+
+• “Most reliable club in the bag.” • Reliability over flash. • No AI
+score manipulation ever. • Player accountability is absolute. •
+Scorekeeper is final authority.
+
+============================================================ PLAYER
+SCREEN – STRUCTURE (FINAL)
+============================================================
+
+TOP HEADER
+
+• Player Name (single player only) • Hole number + Par • Mode badge
+(Buddy / Serious) • Status badge: - Draft - Submitted - Edit Required -
+Locked
+
+SCORE STEPPER
+
+• Large centered score display. • + and – buttons manually adjust hole
+total. • This is the ONLY control that changes hole total. • Penalty
+does NOT auto-adjust score.
+
+STAT CAPSULES (8 IDENTICAL COMPONENTS)
+
+All 8 capsules are visually identical in size, depth, frame, and
+lighting.
+
+TOP ROW: 1. Fairway 2. Sand 3. Green 4. Putts
+
+BOTTOM ROW: 5. Penalty 6. Notes 7. AI Fairway 8. AI Green
+
+RULE: Images NEVER change between states. Only overlays change (ball,
+glow, number, flag color).
+
+PUTTS LOGIC (LOCKED)
+
+Tap cycle: 0 – White flag 1 – Gold flag 2 – Green flag 3 – Red flag 4–5
+– Dark red Next tap resets to white.
+
+PENALTY LOGIC (LOCKED)
+
+• Tap = +1 penalty. • Red intensity increases first 1–3 taps. • After 3,
+color stays strong red, number increments. • AI never adds strokes. • On
+first tap (0→1), show toast: “Need the ruling? Yes / No” • If Yes →
+advisory modal opens. • AI explains only. Player must manually adjust
+score.
+
+NOTES
+
+• Private to player. • Not synced to main feed. • Not deleted by Reset
+Hole.
+
+AI RULES OFFICIAL (HARD LOCK)
+
+• Advisory only. • Cannot add strokes. • Cannot remove strokes. • Cannot
+modify totals. • Cannot modify penalties. • Cannot override anything. •
+Ends advice with: “If that applies, use the Penalty button.”
+
+BOTTOM CONTROL BAR
+
+• Undo Last • Submit Hole • Reset Hole (long-press protected)
+
+SUBMIT FLOW
+
+• Submit = soft lock. • Player can re-edit until scorekeeper locks. • If
+edited after submit → EDITED marker triggered.
+
+DISCREPANCY SYSTEM
+
+• Scorekeeper can flag Discrepancy. • Player sees “Edit Required.” •
+Player edits and re-submits. • Any change logs edit history.
+
+EDIT AUDIT (HOLE TOTAL ONLY)
+
+Tracked: • Previous total • New total • Delta (+/-) • Edit count
+
+Displayed on scorecard: 4 → 5 (+1)
+
+RESET HOLE (FINAL DEFINITION)
+
+• Clears current hole scoring inputs. • Clears submission flag. • Does
+NOT delete notes. • Does NOT delete prior hole data.
+
+VISUAL LOCK
+
+• One master capsule component duplicated 8 times. • No alternate
+capsule designs. • No visual drift. • No different lighting between
+capsules. • Player screen uses accent color. • Scorekeeper screen uses
+gold authority.
+
+FUTURE (PARKED)
+
+• Tournament / Volunteer Live Scoring Mode parked in Vault 7. • Not
+active in Phase 1.
+
+============================================================ STATUS
+============================================================
+
+Player Screen Architecture: HARD LOCKED. AI Authority Limits: HARD
+LOCKED. Penalty + Putts Logic: HARD LOCKED. Discrepancy + Edit Audit:
+HARD LOCKED. Visual Capsule Consistency: HARD LOCKED.
+
+End of Export.
+</pre>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <small>Player Screen spec is hard-locked. Any changes must be deliberate and versioned.</small>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
