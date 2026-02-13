@@ -622,6 +622,45 @@
     }
 
   </style>
+
+  <style id="ms-games-css">
+
+    /* ===== Active Games (8-slot indicator) ===== */
+    .gamesWrap{
+      margin: 0 14px 10px;
+      padding: 10px 10px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .gamesGrid{
+      display:grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+    }
+    .gameSq{
+      height: 30px;
+      border-radius: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 950;
+      letter-spacing: .06em;
+      font-size: 11px;
+      color: rgba(255,255,255,.70);
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
+      user-select:none;
+    }
+    .gameSq.on{
+      color: rgba(255,255,255,.92);
+      border-color: rgba(241,209,122,.28);
+      background: rgba(241,209,122,.10);
+      box-shadow: 0 0 0 1px rgba(241,209,122,.08) inset;
+    }
+
+  </style>
+
 </head>
 <body>
   <div id="msIsoStage">
@@ -706,5 +745,20 @@
 <script src="/assets/js/main.js"></script>
 
   </div>
+
+      <div class="gamesWrap" aria-label="Active games">
+        <div class="gamesGrid" id="msGamesGrid">
+          <!-- 8 slots (wired later) -->
+          <div class="gameSq" data-game="skins" title="Skins">SK</div>
+          <div class="gameSq" data-game="kp" title="KP / Closest-to-the-Pin">KP</div>
+          <div class="gameSq" data-game="birdie" title="Birdie Pot">B</div>
+          <div class="gameSq" data-game="nassau" title="Nassau">N</div>
+          <div class="gameSq" data-game="press" title="Presses">PR</div>
+          <div class="gameSq" data-game="deucepot" title="Deuce Pot">2</div>
+          <div class="gameSq" data-game="eagle" title="Eagle Pot">E</div>
+          <div class="gameSq" data-game="custom" title="Custom / TBD">+</div>
+        </div>
+      </div>
+
 </body>
 </html>
