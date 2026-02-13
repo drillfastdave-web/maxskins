@@ -1,700 +1,371 @@
-/* MaxSkins Premium Web Shell
-   Canonical Deploy: hard_lock_v1.3
-   Filename must remain stable: /assets/css/styles.css
-*/
-:root{
-  --bg0:#07090c;
-  --bg1:#0b0f16;
-  --panel:rgba(255,255,255,0.06);
-  --panel2:rgba(255,255,255,0.09);
-  --stroke:rgba(255,255,255,0.10);
-  --stroke2:rgba(255,255,255,0.18);
-  --text:#eaf1ff;
-  --muted:rgba(234,241,255,0.72);
-  --muted2:rgba(234,241,255,0.55);
-  --accent:#35d07f; /* premium green */
-  --accent2:#5bd3ff; /* cool highlight */
-  --warn:#ffcc66;
-  --danger:#ff6b6b;
-  --shadow: 0 18px 50px rgba(0,0,0,0.55);
-  --radius: 22px;
-  --radius2: 30px;
-  --maxw: 1120px;
-  --pad: clamp(16px, 3vw, 28px);
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-}
+// MaxSkins — canonical main.js
+// Filename must remain stable: /assets/js/main.js
+// Purpose: lightweight UX helpers + active nav highlighting + (staging) contact form confirmation
+(function () {
+  const path = (location.pathname || "/").toLowerCase();
 
-*{ box-sizing:border-box; }
-html,body{ height:100%; }
-body{
-  margin:0;
-  font-family:var(--sans);
-  color:var(--text);
-  background:
-    radial-gradient(1200px 900px at 12% 10%, rgba(53,208,127,0.18), transparent 55%),
-    radial-gradient(900px 700px at 85% 18%, rgba(91,211,255,0.12), transparent 58%),
-    radial-gradient(700px 700px at 55% 85%, rgba(255,204,102,0.08), transparent 55%),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
-  overflow-x:hidden;
-}
+  // Determine the "section" from the first path segment
+  // "/" -> home, "/features" -> features, "/app/player/" -> app
+  const seg = path.split("/").filter(Boolean)[0] || "home";
+  const section = seg; // home|features|rules|pricing|contact|app
 
-a{ color:inherit; text-decoration:none; }
-a:hover{ text-decoration:none; }
+  // Active link highlighting (supports both nav styles used across pages)
+  const allLinks = Array.from(document.querySelectorAll("nav a[href]"));
+  allLinks.forEach((a) => {
+    const hrefRaw = (a.getAttribute("href") || "").toLowerCase();
 
-.container{
-  width:min(var(--maxw), calc(100% - var(--pad) * 2));
-  margin:0 auto;
-}
+    // Only handle site-internal links (/, /features, /app, etc.)
+    if (!hrefRaw.startsWith("/")) return;
 
-.skip{
-  position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;
-}
-.skip:focus{
-  left:16px; top:16px; width:auto; height:auto; padding:10px 14px;
-  background:rgba(0,0,0,0.8);
-  border:1px solid var(--stroke2);
-  border-radius:14px;
-  z-index:9999;
-}
+    const hrefSeg = hrefRaw.split("/").filter(Boolean)[0] || "home";
+    const isActive =
+      (section === "home" && hrefSeg === "home") ||
+      (section !== "home" && hrefSeg === section);
 
-.topbar{
-  position:sticky;
-  top:0;
-  z-index:50;
-  backdrop-filter: blur(14px);
-  background: linear-gradient(180deg, rgba(7,9,12,0.75), rgba(7,9,12,0.35));
-  border-bottom:1px solid rgba(255,255,255,0.08);
-}
-
-.nav{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:14px 0;
-  gap:14px;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-width: 210px;
-}
-.logoMark{
-  width:40px; height:40px;
-  border-radius:14px;
-  background:
-    radial-gradient(18px 18px at 30% 30%, rgba(255,255,255,0.22), transparent 55%),
-    linear-gradient(135deg, rgba(53,208,127,0.95), rgba(91,211,255,0.85));
-  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
-  position:relative;
-  overflow:hidden;
-}
-.logoMark:after{
-  content:"";
-  position:absolute;
-  inset:-40%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
-  transform: rotate(25deg) translateX(-60%);
-  animation: shimmer 3.8s ease-in-out infinite;
-}
-@keyframes shimmer{
-  0%{ transform: rotate(25deg) translateX(-60%); opacity:0.0; }
-  18%{ opacity:0.65; }
-  48%{ opacity:0.0; }
-  100%{ transform: rotate(25deg) translateX(120%); opacity:0.0; }
-}
-.brandName{
-  display:flex; flex-direction:column; line-height:1.1;
-}
-.brandName strong{ font-weight:800; letter-spacing:0.2px; }
-.brandName span{ font-size:12px; color:var(--muted2); letter-spacing:0.35px; }
-
-.navlinks{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-}
-.pill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 12px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.04);
-  color:rgba(234,241,255,0.92);
-  transition: transform .15s ease, background .15s ease, border-color .15s ease;
-  user-select:none;
-}
-.pill:hover{
-  transform: translateY(-1px);
-  background: rgba(255,255,255,0.07);
-  border-color: rgba(255,255,255,0.16);
-}
-.pill[aria-current="page"]{
-  background: rgba(53,208,127,0.12);
-  border-color: rgba(53,208,127,0.28);
-}
-
-.cta{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  padding:12px 14px;
-  border-radius:999px;
-  border:1px solid rgba(53,208,127,0.35);
-  background: linear-gradient(135deg, rgba(53,208,127,0.22), rgba(91,211,255,0.10));
-  box-shadow: 0 12px 35px rgba(0,0,0,0.4);
-  font-weight:700;
-}
-.cta:hover{
-  background: linear-gradient(135deg, rgba(53,208,127,0.28), rgba(91,211,255,0.14));
-}
-
-.hero{
-  padding: 42px 0 20px;
-}
-.heroGrid{
-  display:grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 18px;
-  align-items:stretch;
-}
-@media (max-width: 920px){
-  .heroGrid{ grid-template-columns:1fr; }
-}
-.card{
-  border:1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.045);
-  border-radius: var(--radius2);
-  box-shadow: var(--shadow);
-  overflow:hidden;
-}
-.cardInset{
-  padding: clamp(18px, 3vw, 28px);
-}
-.kicker{
-  font-size:12px;
-  letter-spacing:0.45px;
-  color:var(--muted2);
-  text-transform: uppercase;
-}
-.h1{
-  margin:10px 0 10px;
-  font-size: clamp(34px, 4.2vw, 54px);
-  line-height:1.05;
-  letter-spacing:-0.6px;
-}
-.sub{
-  margin:0;
-  color:var(--muted);
-  font-size: clamp(15px, 1.4vw, 18px);
-  line-height:1.55;
-  max-width: 62ch;
-}
-.heroActions{
-  margin-top: 18px;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  border:1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.05);
-  color:rgba(234,241,255,0.94);
-  font-weight:700;
-  cursor:pointer;
-  transition: transform .15s ease, background .15s ease, border-color .15s ease;
-}
-.btn:hover{
-  transform: translateY(-1px);
-  background: rgba(255,255,255,0.07);
-  border-color: rgba(255,255,255,0.18);
-}
-.btnPrimary{
-  border-color: rgba(53,208,127,0.42);
-  background: linear-gradient(135deg, rgba(53,208,127,0.22), rgba(91,211,255,0.10));
-}
-.btnPrimary:hover{
-  background: linear-gradient(135deg, rgba(53,208,127,0.28), rgba(91,211,255,0.14));
-}
-.btnGhost{
-  background: transparent;
-  border-color: rgba(255,255,255,0.12);
-}
-
-.badges{
-  margin-top: 18px;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  align-items:center;
-}
-@media (max-width: 520px){
-  .badges{gap:8px;}
-  .badges .badge{font-size:12px; padding:7px 9px;}
-}
-.badge{
-  padding: 8px 10px;
-  border-radius: 999px;
-  border:1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.18);
-  color: rgba(234,241,255,0.86);
-  font-size: 13px;
-  display:inline-flex; align-items:center; gap:8px; white-space:nowrap;
-}
-
-/* Scoped numeric badges (Features callouts) */
-.callout .badge{
-  width:34px; height:34px; border-radius:12px;
-  border:1px solid rgba(215,180,90,.25);
-  background: rgba(215,180,90,.08);
-  display:flex; align-items:center; justify-content:center;
-  color: rgba(215,180,90,.95);
-  font-weight:900;
-  flex:0 0 auto;
-}
-
-
-/* Scoped numeric badges (Features callouts) */
-.callout .dot{
-  width:9px; height:9px; border-radius:99px;
-  background: var(--accent);
-  box-shadow: 0 0 0 4px rgba(53,208,127,0.14);
-}
-
-.preview{
-  position:relative;
-  min-height: 320px;
-  background:
-    radial-gradient(180px 180px at 25% 30%, rgba(255,255,255,0.18), transparent 60%),
-    radial-gradient(220px 180px at 70% 35%, rgba(91,211,255,0.13), transparent 60%),
-    radial-gradient(260px 240px at 55% 80%, rgba(53,208,127,0.14), transparent 60%),
-    linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-}
-.preview:before{
-  content:"";
-  position:absolute; inset:0;
-  background:
-    radial-gradient(900px 420px at 50% 90%, rgba(0,0,0,0.55), transparent 60%),
-    linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.35));
-}
-.previewInner{
-  position:relative;
-  padding: 18px;
-  height:100%;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-}
-.phone{
-  width:min(330px, 86%);
-  margin: 10px auto 0;
-  border-radius: 34px;
-  border:1px solid rgba(255,255,255,0.14);
-  background:
-    radial-gradient(200px 160px at 40% 20%, rgba(255,255,255,0.12), transparent 60%),
-    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-  box-shadow: 0 18px 50px rgba(0,0,0,0.55);
-  overflow:hidden;
-}
-.phoneBar{
-  height: 42px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  color: rgba(234,241,255,0.72);
-  font-size: 12px;
-  border-bottom:1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.12);
-}
-.screen{
-  padding: 14px;
-}
-.miniRow{
-  display:flex;
-  gap:10px;
-}
-.miniCard{
-  flex:1;
-  border-radius: 18px;
-  border:1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.20);
-  padding: 12px;
-}
-.miniCard strong{ display:block; font-size:12px; color:rgba(234,241,255,0.78); }
-.miniCard span{ display:block; margin-top:6px; color:rgba(234,241,255,0.55); font-size:12px; }
-
-.section{
-  padding: 22px 0 40px;
-}
-.grid3{
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-@media (max-width: 920px){
-  .grid3{ grid-template-columns:1fr; }
-}
-.feature{
-  border:1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.04);
-  border-radius: var(--radius);
-  padding: 16px;
-  min-height: 150px;
-}
-.feature h3{
-  margin: 6px 0 8px;
-  font-size: 16px;
-  letter-spacing: 0.1px;
-}
-.feature p{
-  margin:0;
-  color: var(--muted);
-  line-height: 1.55;
-  font-size: 14px;
-}
-.feature .tag{
-  display:inline-flex;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.18);
-  color: rgba(234,241,255,0.72);
-  font-size: 12px;
-  gap:8px;
-  align-items:center;
-}
-
-.split{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:14px;
-}
-@media (max-width: 920px){
-  .split{ grid-template-columns:1fr; }
-}
-.panel{
-  border:1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.04);
-  border-radius: var(--radius);
-  padding: 16px;
-}
-.panel h2{
-  margin: 0 0 10px;
-  font-size: 18px;
-}
-.panel ul{
-  margin: 0;
-  padding-left: 18px;
-  color: var(--muted);
-  line-height: 1.7;
-  font-size: 14px;
-}
-.panel li{ margin: 6px 0; }
-
-.footer{
-  padding: 22px 0 34px;
-  border-top:1px solid rgba(255,255,255,0.10);
-  color: var(--muted2);
-  font-size: 13px;
-}
-.footerGrid{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:14px;
-  flex-wrap:wrap;
-}
-.smallprint{
-  font-family: var(--mono);
-  font-size: 12px;
-  color: rgba(234,241,255,0.48);
-}
-
-.form{
-  display:grid;
-  gap:12px;
-}
-.field{
-  display:grid;
-  gap:8px;
-}
-label{ font-size: 13px; color: rgba(234,241,255,0.78); }
-input, textarea{
-  width:100%;
-  padding: 12px 12px;
-  border-radius: 14px;
-  border:1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.20);
-  color: rgba(234,241,255,0.94);
-  outline:none;
-}
-textarea{ min-height: 140px; resize: vertical; }
-input:focus, textarea:focus{
-  border-color: rgba(91,211,255,0.30);
-  box-shadow: 0 0 0 4px rgba(91,211,255,0.10);
-}
-.notice{
-  padding: 12px 14px;
-  border-radius: 16px;
-  border:1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.18);
-  color: rgba(234,241,255,0.72);
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-/* ======================================================
-   MaxSkins GOLD THEME — Single Source of Truth (V1)
-   Derived from the approved Features page gold styling.
-   ====================================================== */
-
-/* Gold theme layer (overrides prior palette) */
-:root{
-      --bg0:#070707;
-      --bg1:#0c0c0c;
-      --text:#f4f1e8;
-      --muted:rgba(244,241,232,.72);
-      --muted2:rgba(244,241,232,.56);
-      --line:rgba(244,241,232,.12);
-      --gold:#d7b45a;
-      --shadow: 0 10px 30px rgba(0,0,0,.55);
-      --radius:18px;
-      --radius2:14px;
-      --max: 1040px;
+    // Support both class conventions without forcing markup changes
+    if (a.classList.contains("nav__link")) {
+      a.classList.toggle("is-active", isActive);
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1200px 600px at 18% -10%, rgba(215,180,90,.16), transparent 60%),
-        radial-gradient(900px 500px at 85% 10%, rgba(215,180,90,.10), transparent 55%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-      min-height:100vh;
-    }
-    a{color:inherit}
-    .skip{position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden;}
-    .skip:focus{
-      left:16px; top:16px; width:auto; height:auto;
-      padding:10px 12px;
-      background:#111; border:1px solid var(--line); border-radius:12px;
-      z-index:9999;
-    }
-    .topbar{
-      position:sticky; top:0; z-index:50;
-      backdrop-filter: blur(10px);
-      background: rgba(7,7,7,.62);
-      border-bottom:1px solid var(--line);
-    }
-    .wrap{max-width:var(--max); margin:0 auto; padding:0 16px;}
-    .bar{display:flex; align-items:center; justify-content:space-between; padding:14px 0; gap:12px;}
-    .brand{display:flex; align-items:center; gap:10px; text-decoration:none; min-width:0;}
-    .logo{
-      width:34px; height:34px; border-radius:12px;
-      background:
-        radial-gradient(18px 18px at 30% 25%, rgba(215,180,90,.95), rgba(215,180,90,.20) 70%),
-        linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.25));
-      border:1px solid rgba(215,180,90,.35);
-      box-shadow: 0 6px 18px rgba(0,0,0,.55);
-      flex:0 0 auto;
-    }
-    .brand h1{
-      font-size:15px; margin:0; letter-spacing:.2px; font-weight:700;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      max-width:52vw;
-    }
-    .brand .sub{display:block; margin-top:1px; font-size:12px; color:rgba(244,241,232,.56); font-weight:500;}
-    .nav{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
-    .pill{
-      text-decoration:none;
-      font-size:13px; font-weight:650;
-      padding:9px 12px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background: rgba(16,16,16,.55);
-      transition: transform .08s ease, border-color .18s ease, background .18s ease;
-    }
-    .pill:hover{ transform: translateY(-1px); border-color: rgba(215,180,90,.34); background: rgba(16,16,16,.72); }
-    .pill.active{
-      border-color: rgba(215,180,90,.55);
-      background: rgba(215,180,90,.10);
-      box-shadow: 0 0 0 1px rgba(215,180,90,.10) inset;
+    if (a.classList.contains("pill")) {
+      a.classList.toggle("active", isActive);
     }
 
-    main{padding:26px 0 52px;}
-    .hero{display:grid; grid-template-columns: 1.15fr .85fr; gap:16px; align-items:stretch;}
-    @media (max-width: 860px){ .hero{grid-template-columns:1fr;} .brand h1{max-width:58vw} }
-    .card{
-      background: rgba(16,16,16,.58);
-      border:1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
+    if (isActive) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  });
+
+  // Soft scroll for internal anchors
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute("href");
+    if (!id || id === "#") return;
+    const target = document.querySelector(id);
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    history.replaceState(null, "", id);
+  });
+
+  // Contact form (staging): no network call, just local confirmation
+  const form = document.querySelector('form[data-contact]');
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      const original = btn ? btn.textContent : "";
+      if (btn) {
+        btn.textContent = "Sent (staging)";
+        btn.disabled = true;
+      }
+      const note = document.querySelector('[data-contact-note]');
+      if (note) {
+        note.textContent =
+          "Staging mode: message captured locally only. Wire to email/API when approved.";
+      }
+      setTimeout(() => {
+        if (btn) {
+          btn.textContent = original || "Send";
+          btn.disabled = false;
+        }
+      }, 2200);
+    });
+  }
+})();
+
+// === Nav active-state (canonical) ===
+(function () {
+  try {
+    var path = (location.pathname || "/").toLowerCase();
+    if (!path.endsWith("/")) path += "/";
+    var links = document.querySelectorAll(".nav .nav-link");
+    links.forEach(function (a) {
+      a.classList.remove("active");
+      var href = (a.getAttribute("href") || "/").toLowerCase();
+      if (href.length > 1 && !href.endsWith("/")) href += "/";
+      if (href === "/" && path === "/") {
+        a.classList.add("active");
+        return;
+      }
+      if (href !== "/" && path.startsWith(href)) a.classList.add("active");
+    });
+  } catch (e) {}
+})();
+
+// ============================================================
+// MaxSkins — Player Screen Module (Production)
+// Boots only on pages containing [data-ms-player="1"]
+// ============================================================
+(function(){
+  const root = document.querySelector('[data-ms-player="1"]');
+  if (!root) return;
+
+  // -------- Utilities --------
+  const $ = (sel, el=document) => el.querySelector(sel);
+  const nowISO = () => new Date().toISOString();
+
+  // -------- HUD elements --------
+  const holeNumEl = $('#holeNum');
+  const holeParEl = $('#holePar');
+  const playerNameEl = $('#playerName');
+
+  // Score stepper
+  const minus = $('#scoreMinus');
+  const plus  = $('#scorePlus');
+  const valEl = $('#scoreVal');
+
+  // Pills
+  const pillFairway = $('#pillFairway');
+  const pillSand    = $('#pillSand');
+  const pillGreen   = $('#pillGreen');
+  const pillPutts   = $('#pillPutts');
+
+  const pillPenalty   = $('#pillPenalty');
+  const pillNotes     = $('#pillNotes');
+  const pillFairwayAI = $('#pillFairwayAI');
+  const pillGreenAI   = $('#pillGreenAI');
+
+  const honorsPill = $('#honorsPill');
+  const submitBtn  = $('#finalizeBtn');
+
+  // -------- State (Phase 1 local) --------
+  // In production this will be fed by round state / websocket. For now localStorage keeps it stable.
+  const STATE_KEY = 'ms_player_state_v1';
+  const SUBMIT_KEY = 'ms_submissions_v1';
+
+  function loadState(){
+    try{
+      return JSON.parse(localStorage.getItem(STATE_KEY) || '{}') || {};
+    }catch(e){ return {}; }
+  }
+  function saveState(s){
+    try{ localStorage.setItem(STATE_KEY, JSON.stringify(s)); }catch(e){}
+  }
+
+  const state = Object.assign({
+    hole: Number(holeNumEl?.textContent || 1),
+    par:  Number(holeParEl?.textContent || 4),
+    playerName: (playerNameEl?.textContent || 'Player').trim(),
+    score: null, // set to par on boot
+    fairway:false,
+    sand:false,
+    green:false,
+    putts:0,
+    penalty:0,
+    submitted:false,
+    lastSubmitAt:null
+  }, loadState());
+
+  // Default score to PAR on new-hole load (HARD LOCK)
+  if (typeof state.score !== 'number' || isNaN(state.score)) state.score = state.par;
+
+  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+
+  function renderScore(){
+    if (valEl) valEl.textContent = String(clamp(state.score, 0, 99));
+  }
+
+  function setToggle(btn, on){
+    if (!btn) return;
+    btn.classList.toggle('active', !!on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  // -------- Toggle pills (non-exclusive HARD LOCK) --------
+  function wireToggle(btn, key){
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      state[key] = !state[key];
+      setToggle(btn, state[key]);
+      saveState(state);
+    });
+    setToggle(btn, state[key]);
+  }
+  wireToggle(pillFairway, 'fairway');
+  wireToggle(pillSand, 'sand');
+  wireToggle(pillGreen, 'green');
+
+  // -------- Putts pill (HARD LOCK from session vault: 0-9 with hold reset; colors by ranges) --------
+  (function(){
+    const flag = $('#puttFlag');
+    const num  = $('#puttNum');
+    if (!pillPutts || !flag || !num) return;
+
+    function setFlagClass(cls){
+      flag.classList.remove('white','gold','green','red');
+      flag.classList.add(cls);
     }
-    .card .inner{ padding:18px 18px 16px; }
-    .kicker{
-      display:inline-flex; gap:8px; align-items:center;
-      font-size:12px; color:var(--muted);
-      border:1px solid rgba(215,180,90,.26);
-      background: rgba(215,180,90,.08);
-      padding:6px 10px;
-      border-radius:999px;
-      letter-spacing:.3px;
+
+    function renderPutts(){
+      const p = clamp(state.putts|0, 0, 9);
+      state.putts = p;
+
+      if (p === 0){
+        setFlagClass('white'); num.textContent = '';
+        pillPutts.classList.remove('active');
+      } else if (p === 1){
+        setFlagClass('gold'); num.textContent = '1';
+        pillPutts.classList.add('active');
+      } else if (p === 2){
+        setFlagClass('green'); num.textContent = '2';
+        pillPutts.classList.add('active');
+      } else {
+        setFlagClass('red'); num.textContent = String(p);
+        pillPutts.classList.add('active');
+      }
+      saveState(state);
     }
-    .dot{width:8px;height:8px;border-radius:99px;background: rgba(215,180,90,.92); box-shadow: 0 0 18px rgba(215,180,90,.55);}
-    .title{margin:10px 0 8px; font-size:28px; line-height:1.12; letter-spacing:.2px;}
-    .lead{margin:0; color:var(--muted); font-size:15px; line-height:1.55; max-width:62ch;}
-    .callouts{display:grid; gap:10px;}
-    .callout{border-top:1px solid var(--line); padding-top:12px; display:flex; gap:12px; align-items:flex-start;}
-        .callout h3{margin:0; font-size:14px; letter-spacing:.2px;}
-    .callout p{margin:4px 0 0; color:var(--muted2); font-size:13px; line-height:1.5;}
 
-    .section{margin-top:18px; padding:18px; border-top:1px solid rgba(215,180,90,.18); background: linear-gradient(180deg, rgba(215,180,90,.06), transparent);}
-    .section h2{margin:0 0 10px; font-size:16px; letter-spacing:.2px;}
-    .grid{display:grid; grid-template-columns: repeat(3, 1fr); gap:12px;}
-    @media (max-width: 920px){ .grid{grid-template-columns:repeat(2,1fr);} }
-    @media (max-width: 560px){ .grid{grid-template-columns:1fr;} }
+    function inc(){ state.putts = ((state.putts|0) + 1) % 10; renderPutts(); }
+    function reset(){ state.putts = 0; renderPutts(); }
 
-    .feat{
-      background: rgba(15,15,15,.62);
-      border:1px solid var(--line);
-      border-radius: var(--radius2);
-      padding:14px;
-      box-shadow: 0 10px 24px rgba(0,0,0,.35);
-      min-height:130px;
+    let holdTimer = null;
+    let held = false;
+
+    pillPutts.addEventListener('pointerdown', () => {
+      held = false;
+      holdTimer = setTimeout(() => { held = true; reset(); }, 1000);
+    });
+    const clearHold = () => { if (holdTimer){ clearTimeout(holdTimer); holdTimer = null; } };
+    pillPutts.addEventListener('pointerup', () => { clearHold(); if (!held) inc(); });
+    pillPutts.addEventListener('pointercancel', clearHold);
+    pillPutts.addEventListener('pointerleave', clearHold);
+
+    pillPutts.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); inc(); }
+      if (e.key === 'Backspace' || e.key === 'Escape'){ e.preventDefault(); reset(); }
+    });
+
+    renderPutts();
+  })();
+
+  // -------- Penalty (Phase 1 minimal): tap increments counter, DOES NOT change score (HARD LOCK) --------
+  function wirePenalty(){
+    if (!pillPenalty) return;
+    pillPenalty.addEventListener('click', () => {
+      state.penalty = clamp((state.penalty|0) + 1, 0, 99);
+      pillPenalty.classList.add('active');
+      // Minimal UI: show count in label
+      const bar = pillPenalty.querySelector('.labelBar');
+      if (bar) bar.textContent = state.penalty > 0 ? `Penalty (+${state.penalty})` : 'Penalty';
+      saveState(state);
+    });
+    // render
+    const bar = pillPenalty?.querySelector('.labelBar');
+    if (bar) bar.textContent = state.penalty > 0 ? `Penalty (+${state.penalty})` : 'Penalty';
+    if (state.penalty > 0) pillPenalty.classList.add('active');
+  }
+  wirePenalty();
+
+  // -------- Notes / AI placeholders (production-safe): no alert() --------
+  function wireNoAlert(btn, msg){
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      console.log('[MaxSkins]', msg);
+      // future: open bottom drawer / modal
+    });
+  }
+  wireNoAlert(pillNotes, 'Notes drawer (TODO Phase 1C)');
+  wireNoAlert(pillFairwayAI, 'Fairway AI advisory (TODO)');
+  wireNoAlert(pillGreenAI, 'Green AI advisory (TODO)');
+
+  // -------- Score stepper (0-99) --------
+  function setScore(n){
+    state.score = clamp(n, 0, 99);
+    renderScore();
+    saveState(state);
+  }
+  if (minus) minus.addEventListener('click', () => setScore((state.score|0) - 1));
+  if (plus)  plus.addEventListener('click',  () => setScore((state.score|0) + 1));
+  renderScore();
+
+  // -------- Honors pill (demo only) --------
+  if (honorsPill){
+    honorsPill.addEventListener('click', () => honorsPill.classList.toggle('active'));
+  }
+
+  // -------- Submit Score flow (HARD LOCK): Submit -> Confirm (2s window) -> Sent --------
+  function playPutterTick(){
+    // TODO: load audio assets; for now safe console marker.
+    // HARD LOCK: no stepper/toggle sounds. Only post-success submit tick.
+    console.log('[MaxSkins] PLAYER_SUBMIT_CONFIRMED (putter tick)');
+  }
+
+  function buildPacket(){
+    return {
+      playerName: state.playerName,
+      hole: state.hole,
+      par: state.par,
+      score: state.score,
+      fairway: !!state.fairway,
+      sand: !!state.sand,
+      green: !!state.green,
+      putts: state.putts|0,
+      penalty: state.penalty|0,
+      submittedAt: nowISO()
+    };
+  }
+
+  function pushSubmission(packet){
+    try{
+      const arr = JSON.parse(localStorage.getItem(SUBMIT_KEY) || '[]');
+      arr.push(packet);
+      localStorage.setItem(SUBMIT_KEY, JSON.stringify(arr));
+      return true;
+    }catch(e){
+      return false;
     }
-    .feat h3{margin:0 0 6px; font-size:14px; letter-spacing:.2px; display:flex; gap:10px; align-items:center;}
-    .chip{
-      display:inline-flex; align-items:center; gap:6px;
-      font-size:11px; padding:5px 9px; border-radius:999px;
-      border:1px solid rgba(215,180,90,.18);
-      background: rgba(215,180,90,.06);
-      color: var(--muted);
-      white-space:nowrap;
+  }
+
+  (function(){
+    if (!submitBtn) return;
+    let armed = false;
+    let timer = null;
+
+    function disarm(){
+      armed = false;
+      submitBtn.classList.remove('confirm');
+      submitBtn.textContent = 'Submit Score';
+      if (timer){ clearTimeout(timer); timer = null; }
     }
-    .feat p{margin:0; color:var(--muted2); font-size:13px; line-height:1.55;}
-    .note{margin-top:8px; color:rgba(244,241,232,.48); font-size:12px; line-height:1.45;}
-    .mutedBlock{opacity:.60; filter:saturate(.95);}
 
-    footer{border-top:1px solid var(--line); color:rgba(244,241,232,.55); padding:18px 0 26px; font-size:12px;}
-    .footRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;}
-    .footRow .links{display:flex; gap:10px; flex-wrap:wrap}
-    .footRow a{color: rgba(244,241,232,.65); text-decoration:none}
-    .footRow a:hover{color: rgba(215,180,90,.95)}
+    // Initialize label
+    submitBtn.textContent = 'Submit Score';
 
-/* Ensure key interactive elements feel like "pills" everywhere */
-.nav .nav-link,
-.pill,
-.btn {
-  border-radius: 999px;
-}
+    submitBtn.addEventListener('click', () => {
+      if (!armed){
+        armed = true;
+        submitBtn.classList.add('confirm');
+        submitBtn.textContent = 'Confirm';
+        timer = setTimeout(disarm, 2000); // HARD LOCK: 2s window
+        return;
+      }
 
-.nav .nav-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(0,0,0,0.18);
-  text-decoration: none;
-}
+      // second tap within window = send
+      disarm();
 
-.nav .nav-link:hover {
-  background: rgba(0,0,0,0.28);
-  border-color: rgba(255,255,255,0.18);
-}
+      const packet = buildPacket();
+      const ok = pushSubmission(packet);
+      if (ok){
+        state.submitted = true;
+        state.lastSubmitAt = packet.submittedAt;
+        saveState(state);
+        playPutterTick();
+        // Production-safe confirmation (no blocking alert)
+        submitBtn.textContent = 'Sent';
+        setTimeout(() => { submitBtn.textContent = 'Submit Score'; }, 1100);
+      } else {
+        // Failure case (HARD LOCK): no sound; allow retry
+        submitBtn.textContent = 'Not sent';
+        setTimeout(() => { submitBtn.textContent = 'Submit Score'; }, 1400);
+      }
+    });
+  })();
 
-.nav .nav-link.active {
-  background: rgba(255, 204, 102, 0.16);
-  border-color: rgba(255, 204, 102, 0.42);
-  box-shadow: 0 0 0 1px rgba(255, 204, 102, 0.18) inset;
-}
+  // Ensure hole/par reflect state (for future wiring)
+  if (holeNumEl) holeNumEl.textContent = String(state.hole);
+  if (holeParEl) holeParEl.textContent = String(state.par);
 
-/* Pills: uniform look across pages */
-.pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 14px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.18);
-  color: inherit;
-  text-decoration: none;
-  user-select: none;
-}
-.pill:hover {
-  background: rgba(0,0,0,0.28);
-  border-color: rgba(255,255,255,0.18);
-}
-.pill.active, .pill[aria-current="page"] {
-  background: rgba(255, 204, 102, 0.16);
-  border-color: rgba(255, 204, 102, 0.42);
-}
-
-/* Buttons: keep the same pill DNA */
-.btn {
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(0,0,0,0.18);
-}
-.btn:hover {
-  background: rgba(0,0,0,0.28);
-  border-color: rgba(255,255,255,0.18);
-}
-.btn-primary {
-  background: rgba(255, 204, 102, 0.18);
-  border-color: rgba(255, 204, 102, 0.45);
-}
-.btn-primary:hover {
-  background: rgba(255, 204, 102, 0.24);
-  border-color: rgba(255, 204, 102, 0.55);
-}
-
-/* Rules hub: keep it dark but gold-aligned */
-body[data-page="rules"] .hero{
-  background: linear-gradient(
-    180deg,
-    rgba(0,0,0,0.72) 0%,
-    rgba(0,0,0,0.46) 100%
-  ) !important;
-}
-
-/* ======================================================
-   UI UNIFY PATCH — Rules (remove white, match Features gold)
-   Locked intent: do not change routing, UI-only.
-   ====================================================== */
-.rulesHero{padding:16px 16px 14px;}
-.rulesHeroTitle{font-size:18px;font-weight:800;letter-spacing:.2px;margin-bottom:6px;}
-.rulesHeroSub{color:var(--muted);font-size:13px;line-height:1.35;margin-bottom:12px;}
-.rulesTabs{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
-.rulesTab{padding:8px 11px;}
-.rulesStack{display:grid;gap:12px;margin-top:14px;}
-.rulesSec{padding:14px 16px;}
-.rulesH2{margin:0 0 10px 0;font-size:16px;font-weight:800;}
-.rulesList{margin:0;padding-left:18px;color:var(--text);}
-.rulesList li{margin:7px 0;color:var(--muted);}
-.rulesTop{margin-top:10px;display:flex;justify-content:flex-end;}
-.rulesTopBtn{padding:7px 10px;font-size:12px;}
-.rulesFooter{margin-top:18px;color:var(--muted2);font-size:12px;padding:10px 2px;}
-/* Header no-jump guard: keep pill geometry constant */
-.pill{border-width:1px; box-sizing:border-box;}
-
-
-
-@media (max-width: 520px){
-  .split{ gap:14px; }
-  .panel{ padding:16px; }
-}
+  // Persist initial
+  saveState(state);
+})();
