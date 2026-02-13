@@ -2,6 +2,50 @@
 
 <html lang="en">
 <head>
+
+  <style id="ms-iso-reset">
+    /* ===== MaxSkins Player Screen Isolation Reset (V3) =====
+       Purpose: prevent global site CSS from shrinking/offsetting the V4 phone UI.
+       We use high-specificity + !important resets on html/body and a fixed stage wrapper.
+    */
+    html, body{
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      background: #0b0b0b !important;
+      overflow: hidden !important;
+      transform: none !important;
+      zoom: 1 !important;
+    }
+    body{
+      display: flex !important;
+      justify-content: center !important;
+      align-items: flex-start !important;
+    }
+    /* Stage: lock the UI to a 390x844 phone canvas and scale ONLY if viewport is smaller */
+    #msIsoStage{
+      width: 390px !important;
+      height: 844px !important;
+      padding: 14px !important;
+      box-sizing: border-box !important;
+      transform-origin: top center !important;
+      --msScale: 1;
+      transform: scale(var(--msScale)) !important;
+    }
+    @media (max-width: 390px){
+      #msIsoStage{ --msScale: calc(100vw / 390); }
+    }
+    @media (max-height: 844px){
+      #msIsoStage{ --msScale: min(var(--msScale), calc(100vh / 844)); }
+    }
+    /* Defend against global font/line-height or box-sizing changes */
+    #msIsoStage, #msIsoStage *{
+      box-sizing: border-box !important;
+      letter-spacing: normal;
+    }
+  </style>
+
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="dark" name="color-scheme"/>
@@ -580,6 +624,8 @@
   </style>
 </head>
 <body>
+  <div id="msIsoStage">
+
 <div aria-label="MaxSkins Player Screen" class="phone" data-ms-player="1">
 <!-- TOP HALF (placeholders; we will skin with real images later) -->
 <section aria-label="Top HUD" class="top">
@@ -658,5 +704,7 @@
 </section><section aria-label="Bottom navigation" class="nav"><div class="navGrid"><button aria-label="Home" class="navBtn" id="navHome" type="button"><div class="ico">🏠</div><div class="txt">Home</div></button><button aria-label="Scores" class="navBtn" id="navScores" type="button"><div class="ico">📊</div><div class="txt">Scores</div></button><button aria-label="Rules" class="navBtn" id="navRules" type="button"><div class="ico">⚖️</div><div class="txt">Rules</div></button><button aria-label="Money" class="navBtn" id="navMoney" type="button"><div class="ico">💰</div><div class="txt">Money</div></button></div></section>
 </div>
 <script src="/assets/js/main.js"></script>
+
+  </div>
 </body>
 </html>
