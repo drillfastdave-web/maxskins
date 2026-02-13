@@ -91,3 +91,281 @@
     });
   } catch (e) {}
 })();
+
+// ============================================================
+// MaxSkins — Player Screen Module (Production)
+// Boots only on pages containing [data-ms-player="1"]
+// ============================================================
+(function(){
+  const root = document.querySelector('[data-ms-player="1"]');
+  if (!root) return;
+
+  // -------- Utilities --------
+  const $ = (sel, el=document) => el.querySelector(sel);
+  const nowISO = () => new Date().toISOString();
+
+  // -------- HUD elements --------
+  const holeNumEl = $('#holeNum');
+  const holeParEl = $('#holePar');
+  const playerNameEl = $('#playerName');
+
+  // Score stepper
+  const minus = $('#scoreMinus');
+  const plus  = $('#scorePlus');
+  const valEl = $('#scoreVal');
+
+  // Pills
+  const pillFairway = $('#pillFairway');
+  const pillSand    = $('#pillSand');
+  const pillGreen   = $('#pillGreen');
+  const pillPutts   = $('#pillPutts');
+
+  const pillPenalty   = $('#pillPenalty');
+  const pillNotes     = $('#pillNotes');
+  const pillFairwayAI = $('#pillFairwayAI');
+  const pillGreenAI   = $('#pillGreenAI');
+
+  const honorsPill = $('#honorsPill');
+  const submitBtn  = $('#finalizeBtn');
+
+  // -------- State (Phase 1 local) --------
+  // In production this will be fed by round state / websocket. For now localStorage keeps it stable.
+  const STATE_KEY = 'ms_player_state_v1';
+  const SUBMIT_KEY = 'ms_submissions_v1';
+
+  function loadState(){
+    try{
+      return JSON.parse(localStorage.getItem(STATE_KEY) || '{}') || {};
+    }catch(e){ return {}; }
+  }
+  function saveState(s){
+    try{ localStorage.setItem(STATE_KEY, JSON.stringify(s)); }catch(e){}
+  }
+
+  const state = Object.assign({
+    hole: Number(holeNumEl?.textContent || 1),
+    par:  Number(holeParEl?.textContent || 4),
+    playerName: (playerNameEl?.textContent || 'Player').trim(),
+    score: null, // set to par on boot
+    fairway:false,
+    sand:false,
+    green:false,
+    putts:0,
+    penalty:0,
+    submitted:false,
+    lastSubmitAt:null
+  }, loadState());
+
+  // Default score to PAR on new-hole load (HARD LOCK)
+  if (typeof state.score !== 'number' || isNaN(state.score)) state.score = state.par;
+
+  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+
+  function renderScore(){
+    if (valEl) valEl.textContent = String(clamp(state.score, 0, 99));
+  }
+
+  function setToggle(btn, on){
+    if (!btn) return;
+    btn.classList.toggle('active', !!on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  // -------- Toggle pills (non-exclusive HARD LOCK) --------
+  function wireToggle(btn, key){
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      state[key] = !state[key];
+      setToggle(btn, state[key]);
+      saveState(state);
+    });
+    setToggle(btn, state[key]);
+  }
+  wireToggle(pillFairway, 'fairway');
+  wireToggle(pillSand, 'sand');
+  wireToggle(pillGreen, 'green');
+
+  // -------- Putts pill (HARD LOCK from session vault: 0-9 with hold reset; colors by ranges) --------
+  (function(){
+    const flag = $('#puttFlag');
+    const num  = $('#puttNum');
+    if (!pillPutts || !flag || !num) return;
+
+    function setFlagClass(cls){
+      flag.classList.remove('white','gold','green','red');
+      flag.classList.add(cls);
+    }
+
+    function renderPutts(){
+      const p = clamp(state.putts|0, 0, 9);
+      state.putts = p;
+
+      if (p === 0){
+        setFlagClass('white'); num.textContent = '';
+        pillPutts.classList.remove('active');
+      } else if (p === 1){
+        setFlagClass('gold'); num.textContent = '1';
+        pillPutts.classList.add('active');
+      } else if (p === 2){
+        setFlagClass('green'); num.textContent = '2';
+        pillPutts.classList.add('active');
+      } else {
+        setFlagClass('red'); num.textContent = String(p);
+        pillPutts.classList.add('active');
+      }
+      saveState(state);
+    }
+
+    function inc(){ state.putts = ((state.putts|0) + 1) % 10; renderPutts(); }
+    function reset(){ state.putts = 0; renderPutts(); }
+
+    let holdTimer = null;
+    let held = false;
+
+    pillPutts.addEventListener('pointerdown', () => {
+      held = false;
+      holdTimer = setTimeout(() => { held = true; reset(); }, 1000);
+    });
+    const clearHold = () => { if (holdTimer){ clearTimeout(holdTimer); holdTimer = null; } };
+    pillPutts.addEventListener('pointerup', () => { clearHold(); if (!held) inc(); });
+    pillPutts.addEventListener('pointercancel', clearHold);
+    pillPutts.addEventListener('pointerleave', clearHold);
+
+    pillPutts.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); inc(); }
+      if (e.key === 'Backspace' || e.key === 'Escape'){ e.preventDefault(); reset(); }
+    });
+
+    renderPutts();
+  })();
+
+  // -------- Penalty (Phase 1 minimal): tap increments counter, DOES NOT change score (HARD LOCK) --------
+  function wirePenalty(){
+    if (!pillPenalty) return;
+    pillPenalty.addEventListener('click', () => {
+      state.penalty = clamp((state.penalty|0) + 1, 0, 99);
+      pillPenalty.classList.add('active');
+      // Minimal UI: show count in label
+      const bar = pillPenalty.querySelector('.labelBar');
+      if (bar) bar.textContent = state.penalty > 0 ? `Penalty (+${state.penalty})` : 'Penalty';
+      saveState(state);
+    });
+    // render
+    const bar = pillPenalty?.querySelector('.labelBar');
+    if (bar) bar.textContent = state.penalty > 0 ? `Penalty (+${state.penalty})` : 'Penalty';
+    if (state.penalty > 0) pillPenalty.classList.add('active');
+  }
+  wirePenalty();
+
+  // -------- Notes / AI placeholders (production-safe): no alert() --------
+  function wireNoAlert(btn, msg){
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      console.log('[MaxSkins]', msg);
+      // future: open bottom drawer / modal
+    });
+  }
+  wireNoAlert(pillNotes, 'Notes drawer (TODO Phase 1C)');
+  wireNoAlert(pillFairwayAI, 'Fairway AI advisory (TODO)');
+  wireNoAlert(pillGreenAI, 'Green AI advisory (TODO)');
+
+  // -------- Score stepper (0-99) --------
+  function setScore(n){
+    state.score = clamp(n, 0, 99);
+    renderScore();
+    saveState(state);
+  }
+  if (minus) minus.addEventListener('click', () => setScore((state.score|0) - 1));
+  if (plus)  plus.addEventListener('click',  () => setScore((state.score|0) + 1));
+  renderScore();
+
+  // -------- Honors pill (demo only) --------
+  if (honorsPill){
+    honorsPill.addEventListener('click', () => honorsPill.classList.toggle('active'));
+  }
+
+  // -------- Submit Score flow (HARD LOCK): Submit -> Confirm (2s window) -> Sent --------
+  function playPutterTick(){
+    // TODO: load audio assets; for now safe console marker.
+    // HARD LOCK: no stepper/toggle sounds. Only post-success submit tick.
+    console.log('[MaxSkins] PLAYER_SUBMIT_CONFIRMED (putter tick)');
+  }
+
+  function buildPacket(){
+    return {
+      playerName: state.playerName,
+      hole: state.hole,
+      par: state.par,
+      score: state.score,
+      fairway: !!state.fairway,
+      sand: !!state.sand,
+      green: !!state.green,
+      putts: state.putts|0,
+      penalty: state.penalty|0,
+      submittedAt: nowISO()
+    };
+  }
+
+  function pushSubmission(packet){
+    try{
+      const arr = JSON.parse(localStorage.getItem(SUBMIT_KEY) || '[]');
+      arr.push(packet);
+      localStorage.setItem(SUBMIT_KEY, JSON.stringify(arr));
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+
+  (function(){
+    if (!submitBtn) return;
+    let armed = false;
+    let timer = null;
+
+    function disarm(){
+      armed = false;
+      submitBtn.classList.remove('confirm');
+      submitBtn.textContent = 'Submit Score';
+      if (timer){ clearTimeout(timer); timer = null; }
+    }
+
+    // Initialize label
+    submitBtn.textContent = 'Submit Score';
+
+    submitBtn.addEventListener('click', () => {
+      if (!armed){
+        armed = true;
+        submitBtn.classList.add('confirm');
+        submitBtn.textContent = 'Confirm';
+        timer = setTimeout(disarm, 2000); // HARD LOCK: 2s window
+        return;
+      }
+
+      // second tap within window = send
+      disarm();
+
+      const packet = buildPacket();
+      const ok = pushSubmission(packet);
+      if (ok){
+        state.submitted = true;
+        state.lastSubmitAt = packet.submittedAt;
+        saveState(state);
+        playPutterTick();
+        // Production-safe confirmation (no blocking alert)
+        submitBtn.textContent = 'Sent';
+        setTimeout(() => { submitBtn.textContent = 'Submit Score'; }, 1100);
+      } else {
+        // Failure case (HARD LOCK): no sound; allow retry
+        submitBtn.textContent = 'Not sent';
+        setTimeout(() => { submitBtn.textContent = 'Submit Score'; }, 1400);
+      }
+    });
+  })();
+
+  // Ensure hole/par reflect state (for future wiring)
+  if (holeNumEl) holeNumEl.textContent = String(state.hole);
+  if (holeParEl) holeParEl.textContent = String(state.par);
+
+  // Persist initial
+  saveState(state);
+})();
