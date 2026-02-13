@@ -647,3 +647,39 @@
   render();
   setInterval(render, 350);
 })();
+
+// ============================================================
+// MaxSkins — Active Games Strip (8-slot)
+// Renders read-only indicators on Player + Scorekeeper.
+// Uses ms_round_state_v1.activeGames (Phase 1 local).
+// Includes: skins, kp, birdie, nassau, press, deucepot, eagle, custom
+// ============================================================
+(function(){
+  const ROUND_KEY = 'ms_round_state_v1';
+  const defaults = ['skins','kp','birdie','nassau','press','deucepot','eagle']; // custom is off by default
+
+  function load(key, fallback){
+    try{
+      const v = JSON.parse(localStorage.getItem(key) || 'null');
+      return (v === null || v === undefined) ? fallback : v;
+    }catch(e){ return fallback; }
+  }
+  function save(key, v){
+    try{ localStorage.setItem(key, JSON.stringify(v)); }catch(e){}
+  }
+
+  const round = load(ROUND_KEY, {});
+  if (!Array.isArray(round.activeGames)){
+    round.activeGames = defaults.slice();
+    save(ROUND_KEY, round);
+  }
+
+  const grid = document.getElementById('msGamesGrid');
+  if (!grid) return;
+
+  const active = new Set((round.activeGames || []).map(x => String(x).toLowerCase()));
+  grid.querySelectorAll('.gameSq').forEach((el) => {
+    const key = String(el.getAttribute('data-game') || '').toLowerCase();
+    el.classList.toggle('on', active.has(key));
+  });
+})();
