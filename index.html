@@ -1,236 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
-  <title>MaxSkins — Premium Golf Skins Tracker</title>
-  <meta name="description" content="MaxSkins — premium golf scoring + wager tracking for real-money skins games." />
-
-  <!-- Canonical assets (do not version in filename) -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MaxSkins — App</title>
   <link rel="stylesheet" href="/assets/css/styles.css" />
-  <link rel="icon" href="/assets/img/favicon.png" />
-
-  <!-- Optional: social preview -->
-  <meta property="og:title" content="MaxSkins — Premium Golf Skins Tracker" />
-  <meta property="og:description" content="Track skins, presses, pots, and payouts. Built for real money. Designed for speed." />
-  <meta property="og:type" content="website" />
 </head>
+<body>
 
-<body data-page="home">
-  <a class="skip" href="#main">Skip to content</a>
-
-  <!--
-    MaxSkins CANONICAL WEB BUILD
-    File: /index.html
-    Assets: /assets/css/styles.css  |  /assets/js/main.js
-    Rule: Single canonical structure only (no duplicate page trees).
-  -->
-
-  <a class="skip-link" href="#main">Skip to content</a>
-
-  <header class="topbar">
-    <div class="wrap">
-      <div class="bar">
-        <a class="brand" href="/" aria-label="MaxSkins Home">
-          <span class="logo" aria-hidden="true"></span>
-          <span>
-            <h1>MaxSkins <span class="sub">Premium golf scoring + wagers</span></h1>
-          </span>
-        </a>
-
-        <nav class="nav" aria-label="Primary">
-          <a class="pill active" href="/">Home</a>
-<a class="pill" href="/features/">Features</a>
-<a class="pill" href="/rules/">Rules</a>
-<a class="pill" href="/pricing/">Pricing</a>
-<a class="pill" href="/contact/">Contact</a>
-        </nav>
-      </div>
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand">
+      <strong>MaxSkins</strong>
+      <span class="tagline">Premium golf scoring + wagering</span>
     </div>
-  </header>
+    <nav class="nav">
+      <a href="/" class="pill">Home</a>
+      <a href="/features/" class="pill">Features</a>
+      <a href="/rules/" class="pill">Rules</a>
+      <a href="/pricing/" class="pill">Pricing</a>
+      <a href="/app/" class="pill active">App</a>
+      <a href="/contact/" class="pill">Contact</a>
+    </nav>
+  </div>
+</header>
 
-  <main id="main" class="main" role="main">
-    <!-- HERO (anchored to Features styling) -->
-    <section class="hero">
-      <div class="wrap hero__inner">
-        <div class="hero__copy">
-          <p class="pill">Premium Skins + Presses Tracker</p>
-          <h1 class="hero__title">Real‑money skins. <span class="glow">No arguments</span>.</h1>
-          <p class="hero__sub">
-            MaxSkins tracks skins, presses, side pots, carryovers, and payouts — fast on the tee box, clear at the bar, locked when you finalize.
-          </p>
+<main class="container">
+  <section class="hero-panel">
+    <h1>MaxSkins App</h1>
+    <p>Choose your screen. The scorekeeper runs the round. Players enter stats from their devices.</p>
+  </section>
 
-          <div class="hero__cta">
-            <a class="btn btn--primary" href="features.html#setup">See How It Works</a>
-            <a class="btn btn--ghost" href="/pricing/">View Pricing</a>
-          </div>
-
-          <div class="hero__stats" aria-label="Key highlights">
-            <div class="stat">
-              <div class="stat__num">1 tap</div>
-              <div class="stat__label">Finalize gate</div>
-            </div>
-            <div class="stat">
-              <div class="stat__num">Live</div>
-              <div class="stat__label">Pots & carryovers</div>
-            </div>
-            <div class="stat">
-              <div class="stat__num">Clear</div>
-              <div class="stat__label">Settlement & receipts</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="hero__card" role="region" aria-label="Quick start panel">
-          <div class="card">
-            <div class="card__head">
-              <h2 class="card__title">Quick Start</h2>
-              <p class="card__hint">Pick a path — the same buttons as the top nav.</p>
-            </div>
-
-            <div class="card__grid">
-              <a class="tile" href="/features/">
-                <span class="tile__kicker">Start here</span>
-                <span class="tile__title">Features</span>
-                <span class="tile__desc">What MaxSkins does — and why it’s different.</span>
-              </a>
-
-              <a class="tile" href="/rules/">
-                <span class="tile__kicker">MSG Rulebook</span>
-                <span class="tile__title">Rules</span>
-                <span class="tile__desc">Fast rulings + Gentlemen’s options (coming).</span>
-              </a>
-
-              <a class="tile" href="/pricing/">
-                <span class="tile__kicker">Per round</span>
-                <span class="tile__title">Pricing</span>
-                <span class="tile__desc">Standard vs Pro (Ultra Player Sync).</span>
-              </a>
-
-              <a class="tile" href="/contact/">
-                <span class="tile__kicker">Mens league</span>
-                <span class="tile__title">Contact</span>
-                <span class="tile__desc">Get on the list / talk league rollout.</span>
-              </a>
-            </div>
-
-            <div class="card__foot">
-              <p class="micro">
-                Tip: The build stays clean when pages are only <code>/index.html</code> + <code>/features.html</code> +
-                <code>/rules.html</code> + <code>/pricing.html</code> + <code>/contact.html</code>.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="hero__fade" aria-hidden="true"></div>
-    </section>
-
-    <!-- BUTTON ROW (canonical “button-based UI” is the live standard) -->
-    <section class="hub" aria-label="Site hub">
-      <div class="wrap">
-        <h2 class="section-title">Home Hub</h2>
-        <p class="section-sub">One clean screen. No text walls.</p>
-
-        <div class="hub__buttons" role="list">
-          <a role="listitem" class="hubbtn is-active" href="/">
-            <span class="hubbtn__title">Home</span>
-            <span class="hubbtn__sub">Launchpad</span>
-          </a>
-
-          <a role="listitem" class="hubbtn" href="/features/">
-            <span class="hubbtn__title">Features</span>
-            <span class="hubbtn__sub">What you get</span>
-          </a>
-
-          <a role="listitem" class="hubbtn" href="/rules/">
-            <span class="hubbtn__title">Rules</span>
-            <span class="hubbtn__sub">MSG rulings</span>
-          </a>
-
-          <a role="listitem" class="hubbtn" href="/pricing/">
-            <span class="hubbtn__title">Pricing</span>
-            <span class="hubbtn__sub">Per round</span>
-          </a>
-
-          <a role="listitem" class="hubbtn" href="/contact/">
-            <span class="hubbtn__title">Contact</span>
-            <span class="hubbtn__sub">League / beta</span>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- FEATURE TEASERS (pull tone from Features page) -->
-    <section class="teasers">
-      <div class="wrap">
-        <h2 class="section-title">What MaxSkins nails</h2>
-        <p class="section-sub">Built for the moments that start fights.</p>
-
-        <div class="grid3">
-          <article class="panel">
-            <h3 class="panel__title">Finalize Gate</h3>
-            <p class="panel__body">
-              Finalize locks betting live. After that: no edits, no confusion.
-            </p>
-          </article>
-
-          <article class="panel">
-            <h3 class="panel__title">Skins + Presses</h3>
-            <p class="panel__body">
-              Track live skins, carryovers, and presses — no cart math.
-            </p>
-          </article>
-
-          <article class="panel">
-            <h3 class="panel__title">Clean Settlement</h3>
-            <p class="panel__body">
-              End‑of‑round payout summary that’s easy to read and hard to argue with.
-            </p>
-          </article>
-        </div>
-
-        <div class="teasers__cta">
-          <a class="btn btn--primary" href="/features/">Go to Features</a>
-          <a class="btn btn--ghost" href="/rules/">Open Rulebook</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- FOOTNOTE -->
-    <section class="note">
-      <div class="wrap note__inner">
-        <div class="note__box">
-          <h2 class="note__title">Canonical structure lock</h2>
-          <p class="note__body">
-            Minimal, button‑driven, canonical. Keep one copy of each page — avoid alternate indexes or extra <code>/pages</code> trees.
-          </p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="footer" role="contentinfo">
-    <div class="wrap footer__inner">
-      <div class="footer__left">
-        <div class="footer__brand">MaxSkins</div>
-        <div class="footer__small">© <span id="y"></span> MaxSkins. All rights reserved.</div>
-      </div>
-
-      <div class="footer__right">
-        <a class="footer__link" href="/contact/">Contact</a>
-        <a class="footer__link" href="/pricing/">Pricing</a>
-        <a class="footer__link" href="/rules/">Rules</a>
-      </div>
+  <section class="card-grid">
+    <div class="card">
+      <h3>Scorekeeper</h3>
+      <p>Main scoring interface. Controls round state, presses, and settlement.</p>
     </div>
-  </footer>
 
-  <script src="/assets/js/main.js"></script>
-  <script>
-    // tiny inline helper that won't conflict with main.js
-    (function(){ var el=document.getElementById('y'); if(el) el.textContent = String(new Date().getFullYear()); })();
-  </script>
+    <div class="card">
+      <h3>Player</h3>
+      <p>Individual player input screen. Enter fairways, GIR, putts, penalties and sync to main scorer.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>© MaxSkins Golf — App (Phase 1)</p>
+    <p style="font-size:12px; opacity:0.6;">Hard lock replacement generated 2026-02-12 04:40:08</p>
+  </div>
+</footer>
+
 </body>
 </html>
