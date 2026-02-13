@@ -1,0 +1,6 @@
+# MaxSkins – Stable Canonical Redirects (NO rewrites)
+/features   /features/   301
+/rules      /rules/      301
+/pricing    /pricing/    301
+/contact    /contact/    301
+/app        /app/        301
