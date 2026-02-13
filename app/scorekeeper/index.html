@@ -2,165 +2,356 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="color-scheme" content="dark" />
-  <title>MaxSkins App — Scorekeeper Screen (Locked Spec)</title>
-  <meta name="description" content="MaxSkins Phase 1 — Scorekeeper/Scoring Screen hard-locked architecture and rules." />
-  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <title>MaxSkins — Scorekeeper</title>
+  <meta name="description" content="MaxSkins Phase 1 — Scorekeeper (production build)."/>
+  <link rel="icon" href="/assets/img/MSG_LOGO.png" />
+
+  <style id="ms-iso-reset">
+    html, body{
+      margin:0 !important; padding:0 !important; width:100% !important; height:100% !important;
+      background:#0b0b0b !important; overflow:hidden !important; transform:none !important; zoom:1 !important;
+    }
+    body{ display:flex !important; justify-content:center !important; align-items:flex-start !important; }
+    #msIsoStage{
+      width:390px !important; height:844px !important; padding:14px !important; box-sizing:border-box !important;
+      transform-origin:top center !important; --msScale:1; transform:scale(var(--msScale)) !important;
+    }
+    @media (max-width:390px){ #msIsoStage{ --msScale: calc(100vw / 390); } }
+    @media (max-height:844px){ #msIsoStage{ --msScale: min(var(--msScale), calc(100vh / 844)); } }
+    #msIsoStage, #msIsoStage *{ box-sizing:border-box !important; }
+  </style>
+
+
+  <style id="ms-sk-css">
+    :root{
+      --bg:#0b0b0b;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.12);
+      --stroke2: rgba(255,255,255,.18);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --muted2: rgba(255,255,255,.56);
+      --gold: #f1d17a;
+      --green:#4ee58a;
+      --red:#ff5a5f;
+      --amber:#ffb020;
+      --shadow: 0 14px 36px rgba(0,0,0,.55);
+      --radius: 18px;
+      --radius2: 14px;
+      --btn: rgba(255,255,255,.10);
+      --btn2: rgba(255,255,255,.14);
+    }
+
+    .phone{
+      width: 100%;
+      height: 100%;
+      border-radius: 26px;
+      background: radial-gradient(1200px 700px at 50% 0%, rgba(255,255,255,.06), transparent 55%),
+                  radial-gradient(900px 520px at 50% 40%, rgba(241,209,122,.08), transparent 60%),
+                  linear-gradient(180deg, #0b0b0b, #050505 70%);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .top{
+      padding: 12px 14px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .metaLeft{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+    }
+
+    .holeLine{
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .subLine{
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .capWrap{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap: 6px;
+      margin-top: 1px;
+    }
+
+    .capBadge{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .capBall{
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display:grid;
+      place-items:center;
+      font-size: 11px;
+      font-weight: 950;
+      color: #0b0b0b;
+      background: var(--gold);
+      box-shadow: 0 10px 18px rgba(0,0,0,.45);
+      position: relative;
+    }
+    .capBall:after{
+      content:"";
+      position:absolute;
+      inset: 4px;
+      border-radius: 50%;
+      border: 1px dashed rgba(0,0,0,.25);
+      opacity: .65;
+    }
+
+    .readyBtn{
+      margin: 0 14px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      height: 48px;
+      border-radius: var(--radius);
+      background: rgba(241,209,122,.10);
+      border: 1px solid rgba(241,209,122,.20);
+      color: var(--text);
+      font-weight: 950;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      user-select:none;
+      cursor:pointer;
+    }
+    .readyBtn.on{
+      background: rgba(78,229,138,.10);
+      border-color: rgba(78,229,138,.25);
+    }
+
+    .sectionTitle{
+      margin: 0 14px 8px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .list{
+      margin: 0 14px;
+      padding: 10px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .row{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      margin-bottom: 10px;
+    }
+    .row:last-child{ margin-bottom: 0; }
+
+    .num{
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      display:grid;
+      place-items:center;
+      font-weight: 950;
+      color: rgba(255,255,255,.95);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      flex: 0 0 auto;
+    }
+    .num.red{ background: rgba(255,90,95,.18); border-color: rgba(255,90,95,.35); }
+    .num.green{ background: rgba(78,229,138,.16); border-color: rgba(78,229,138,.35); }
+    .num.amber{ background: rgba(255,176,32,.16); border-color: rgba(255,176,32,.35); }
+    .num.gold{ background: rgba(241,209,122,.16); border-color: rgba(241,209,122,.35); color: rgba(255,255,255,.96); }
+
+    .name{
+      flex: 1 1 auto;
+      font-weight: 900;
+      color: var(--text);
+      font-size: 14px;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .name.cap{
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+      text-decoration-color: rgba(241,209,122,.85);
+    }
+
+    .scoreBox{
+      width: 66px;
+      height: 34px;
+      border-radius: 11px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 950;
+      letter-spacing: .06em;
+      color: rgba(255,255,255,.92);
+      background: rgba(0,0,0,.20);
+      border: 1px solid rgba(255,255,255,.12);
+      flex: 0 0 auto;
+    }
+    .scoreBox.missing{ color: rgba(255,255,255,.50); }
+
+    .fixBtn{
+      height: 34px;
+      padding: 0 10px;
+      border-radius: 11px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.86);
+      font-weight: 900;
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor:pointer;
+      user-select:none;
+    }
+    .fixBtn:active{ transform: translateY(1px); }
+    .fixBtn.disabled{
+      opacity: .45;
+      pointer-events:none;
+    }
+
+    .finalizeWrap{
+      margin: 12px 14px 10px;
+    }
+
+    .finalizeBtn{
+      width: 100%;
+      height: 52px;
+      border-radius: var(--radius);
+      background: rgba(241,209,122,.10);
+      border: 1px solid rgba(241,209,122,.22);
+      color: rgba(255,255,255,.92);
+      font-weight: 950;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      cursor:pointer;
+      user-select:none;
+    }
+    .finalizeBtn.disabled{
+      opacity: .38;
+      pointer-events:none;
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.10);
+      color: rgba(255,255,255,.75);
+    }
+    .finalizeHint{
+      margin-top: 8px;
+      font-size: 12px;
+      color: rgba(255,255,255,.58);
+      text-align:center;
+    }
+
+    .nav{
+      position:absolute;
+      left: 0; right:0; bottom:0;
+      padding: 10px 14px 14px;
+      background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.55) 35%, rgba(0,0,0,.75));
+    }
+    .navGrid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .navBtn{
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.86);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      text-decoration:none;
+      user-select:none;
+    }
+  </style>
+
 </head>
-<body data-page="app-scorekeeper">
-  <a class="skip" href="#main">Skip to content</a>
+<body>
+  <div id="msIsoStage">
+    <div class="phone" data-ms-scorekeeper="1">
+      <div class="top">
+        <div class="metaLeft">
+          <div class="holeLine">HOLE <span id="skHole">1</span>  PAR <span id="skPar">4</span></div>
+          <div class="subLine">Pot: <span id="skPot">$25</span> • Skins this hole: <span id="skSkins">1</span></div>
+        </div>
 
-  <header class="topbar" role="banner">
-    <div class="wrap topbar__inner">
-      <div class="brand">
-        <a class="brand__link" href="/" aria-label="MaxSkins Home">
-          <span class="brand__mark" aria-hidden="true">⛳</span>
-          <span class="brand__word">MaxSkins</span>
-          <span class="brand__tag">Better Golf, Smarter Bets</span>
-        </a>
+        <div class="capWrap">
+          <div class="capBadge" title="Scorekeeper Captain">
+            <span class="capBall">C</span>
+            <span>Captain: <span id="skCaptain">Dave</span></span>
+          </div>
+        </div>
       </div>
 
-      <nav class="nav" aria-label="Primary">
-        <a class="nav__link is-active" href="/">Home</a>
-        <a class="nav__link" href="/features/">Features</a>
-        <a class="nav__link" href="/rules/">Rules</a>
-        <a class="nav__link" href="/pricing/">Pricing</a>
-        <a class="nav__link" href="/app/">App</a>
-        <a class="nav__link" href="/contact/">Contact</a>
-      </nav>
+      <div class="readyBtn on" id="readyBtn">READY GOLF</div>
 
-      <div class="topbar__actions">
-        <a class="btn btn--ghost" href="/contact/">Get Updates</a>
-        <a class="btn btn--primary" href="features.html#try">Try Demo</a>
+      <div class="sectionTitle">Players</div>
+      <div class="list" id="playerList">
+        <!-- rows injected by JS -->
+      </div>
+
+      <div class="finalizeWrap">
+        <button class="finalizeBtn disabled" id="finalizeBtn">Finalize Hole</button>
+        <div class="finalizeHint" id="finalizeHint">Waiting for 4 scores…</div>
+      </div>
+
+      <div class="nav">
+        <div class="navGrid">
+          <a class="navBtn" href="/">Home</a>
+          <a class="navBtn" href="/app/">Scores</a>
+          <a class="navBtn" href="/rules/">Rules</a>
+          <a class="navBtn" href="/pricing/">Money</a>
+        </div>
       </div>
     </div>
-  </header>
-
-  <main class="container" id="main" style="padding-top:24px;">
-    <section class="hero">
-      <h1 class="hero__title">Scorekeeper Screen — Locked Spec</h1>
-      <p class="hero__subtitle">This is the authoritative spec snapshot from the hard-lock export.</p>
-      <div class="cta-row">
-        <a class="btn" href="/app/">← Back to App</a>
-      </div>
-    </section>
-
-    <section class="card" style="margin-top:18px;">
-      <h2 class="card__title">Export (verbatim)</h2>
-      <pre class="pre" style="white-space:pre-wrap; line-height:1.3;">MAXSKINS – SCORING SCREEN HARD LOCK Session Summary Export Timestamp:
-2026-02-11 19:17
-
-  ----------------------------
-  CORE UI STRUCTURE (LOCKED)
-  ----------------------------
-
-Eight identical vertical pill buttons (2 rows of 4):
-
-TOP ROW (Gameplay Stats) 1. Fairway 2. Sand 3. Green 4. Putts
-
-BOTTOM ROW (Support / Utility) 5. Penalty (Lost Ball / OB – adds
-strokes) 6. Notes (Microphone icon – full screen note entry) 7. Fairway
-AI Assistant 8. Green AI Assistant
-
-  -----------------------------
-  PILL DESIGN SYSTEM (LOCKED)
-  -----------------------------
-
-• All pills identical in size and shape. • Black base body with flat
-gold ring border. • When activated: - Ring turns solid flat gold. -
-Subtle outer glow (premium look). - Light haptic vibration feedback
-(tiny “brrt”).
-
-• Images NEVER change between states. • Only overlays change (ball
-appearance, glow, flag color, etc.).
-
-  ------------------------
-  VISUAL LOGIC – TOP ROW
-  ------------------------
-
-FAIRWAY • Base image: realistic fairway, wide cut, no flag. • On
-activation: - Small white golf ball appears (~75% toward top). - Gold
-ring activates. - Subtle vibration.
-
-SAND • Realistic bunker image (locked design). • On activation: - Small
-white golf ball appears in sand. - Gold ring activates. - Subtle
-vibration.
-
-GREEN • Aerial 30–60 yard perspective. • No hole visible in base state.
-• On activation: - Small white golf ball appears centered. - Gold ring
-activates. - Subtle vibration.
-
-PUTTS • Flagstick centered vertically. • Small hole visible. • No ball
-in base state. • Clicking cycles putt count: White flag (0) Gold flag (1
-putt) Green flag (2 putts) Red flag (3 putts) Dark red (4–5 putts max) •
-Max logical putts: 5 • After 5 → reset to white • Number displayed on
-flag. • Subtle vibration each press.
-
-  -----------------------------------
-  PENALTY SYSTEM (LOCKED DIRECTION)
-  -----------------------------------
-
-• Penalty pill adds strokes. • Lost ball / OB simplified to stroke add.
-• AI confirmation required before auto-marking. • Calm + confident UI
-tone.
-
-  --------------
-  NOTES SYSTEM
-  --------------
-
-• Microphone icon (premium look). • Full-screen modal. • Background
-blur. • Auto-save on close. • Preset quick notes suggested (water, OB,
-provisional, etc.).
-
-  --------------------------
-  AI RULES SYSTEM (LOCKED)
-  --------------------------
-
-• Located in bottom navigation (permanent but subtle). • Quiet safety
-net design. • Full-screen popup when activated. • Blurred background. •
-Presets for top common rulings: - Water hazard - Out of bounds - Lost
-ball - Provisional ball - Unplayable lie
-
-• Microphone auto-active. • “Talk to me. Tell me what happened.” •
-Clarifies before applying penalties. • Asks: “Do you want me to add this
-stroke?”
-
-  ----------------------
-  INTERACTION FEEDBACK
-  ----------------------
-
-• Ball appears on stat activation. • Flat gold ring highlight. • Tiny
-haptic vibration. • No dramatic animation. • Premium, calm, confident
-tone.
-
-  --------------------------------
-  DRIFT CONTROL (LESSON LEARNED)
-  --------------------------------
-
-• Pills remain vertical. • Image content remains fixed. • Only overlays
-change. • No redesigning shape mid-stream. • No adding/removing pills
-without structural discussion.
-
-  --------------------
-  FINAL STATE INTENT
-  --------------------
-
-Eight vertical premium pills. Clean. Identical sizing. Subtle gold
-activation. Ball overlays only. AI rules as quiet power tool. Hard-lock
-direction confirmed.
-
-END OF EXPORT
-</pre>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <div class="container">
-      <small>Scorekeeper Screen spec is hard-locked. Any changes must be deliberate and versioned.</small>
-    </div>
-  </footer>
-
+  </div>
   <script src="/assets/js/main.js"></script>
 </body>
 </html>
