@@ -1,171 +1,859 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
-  <title>MaxSkins App — Player Screen (Locked Spec)</title>
-  <meta name="description" content="MaxSkins Phase 1 — Player Screen hard-locked architecture and rules." />
-  <link rel="stylesheet" href="/assets/css/styles.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="dark" name="color-scheme"/>
+<title>MaxSkins — Player Screen (UI V1 Layout Locked)</title>
+<style>
+    :root{
+      --bg0:#060608;
+      --bg1:#0a0a0f;
+      --panel: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.12);
+      --stroke2: rgba(255,255,255,.18);
+      --ink:#f2f2f6;
+
+      --gold:#f1d17a;
+      --gold2:#b9851b;
+      --green:#45d37b;
+      --red:#e04a4a;
+
+      --ringOff: rgba(241,209,122,.18);
+      --ringOn: rgba(241,209,122,.55);
+
+      --shadow: 0 18px 50px rgba(0,0,0,.55);
+      --inner: inset 0 1px 0 rgba(255,255,255,.10);
+
+      --pillRadius: 22px;
+      --pillGap: 9px;
+      --edgePad: 0px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(900px 650px at 50% -10%, rgba(241,209,122,.08), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      color:var(--ink);
+      display:flex;
+      justify-content:center;
+      padding:14px 14px calc(18px + env(safe-area-inset-bottom));
+    }
+
+    .phone{
+      width:min(430px, 100%);
+      border-radius:28px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.06);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.12));
+    }
+
+    /* ---------- TOP HALF PLACEHOLDERS (to be styled with real art later) ---------- */
+    .top{
+      padding: 12px 16px 8px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.05));
+    }
+
+    .hero{
+      height: 78px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(240px 120px at 50% 20%, rgba(241,209,122,.10), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.20));
+      box-shadow: var(--inner);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      letter-spacing:.18em;
+      opacity:.9;
+      text-transform:uppercase;
+      user-select:none;
+    }
+
+    .metaRow{
+      margin-top: 8px;
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items:center;
+    }
+
+    .holePill{
+      border-radius: 14px;
+      padding: 9px 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--inner);
+      font-weight:800;
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .honors{
+      border-radius: 14px;
+      padding: 9px 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--inner);
+      font-weight:900;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      user-select:none;
+      text-align:center;
+      min-width: 120px;
+    }
+
+    .playerRow{
+      margin-top: 8px;
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items:center;
+    }
+
+    .playerName{
+      border-radius: 14px;
+      padding: 12px 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--inner);
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-height: 44px;
+    }
+
+    .playerName small{
+      opacity:.75;
+      font-weight:700;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-size: 11px;
+    }
+
+    .scoreMini{
+      border-radius: 14px;
+      padding: 10px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--inner);
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      user-select:none;
+    }
+
+    .miniBtn{
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:var(--ink);
+      font-weight:900;
+      font-size: 18px;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .miniBtn:active{ transform: translateY(1px); }
+
+    .miniScore{
+      width: 44px;
+      text-align:center;
+      font-weight:900;
+      font-size: 18px;
+    }
+
+    /* ---------- BOTTOM HALF: 2x4 VERTICAL PILL GRID (this is the important part) ---------- */
+    .bottom{
+      padding: 14px 14px 18px;
+      background: radial-gradient(900px 650px at 50% 120%, rgba(69,211,123,.05), transparent 55%);
+    }
+
+    .pillGrid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--pillGap);
+      padding: 2px 0 0;
+      align-items:stretch;
+    }
+
+    .pill{
+      position:relative;
+      height: 170px;
+      border-radius: var(--pillRadius);
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.18));
+      box-shadow: 0 14px 28px rgba(0,0,0,.38), var(--inner);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      padding: 10px 10px 12px;
+    }
+
+    .pill:active{ transform: translateY(1px); }
+
+    .pill:focus-visible{
+      outline: 2px solid rgba(241,209,122,.65);
+      outline-offset: 2px;
+    }
+
+    /* glowing outer ring look */
+    .pill::before{
+      content:"";
+      position:absolute;
+      inset: 7px;
+      border-radius: calc(var(--pillRadius) - 7px);
+      border: 2px solid var(--ringOff);
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+      transition: border-color .12s ease, box-shadow .12s ease;
+      pointer-events:none;
+    }
+    .pill.active::before{
+      border-color: var(--ringOn);
+      box-shadow: 0 0 28px rgba(241,209,122,.18), 0 0 0 1px rgba(241,209,122,.10);
+    }
+
+    .pill .window{
+      position:absolute;
+      left:10px; right:10px;
+      top:10px;
+      height: 118px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(120px 70px at 50% 30%, rgba(255,255,255,.06), transparent 65%),
+        linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.05));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+
+    /* the "ball" that appears for Fairway/Sand/Green */
+    .ball{
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,.98), rgba(210,210,210,.95) 46%, rgba(170,170,170,.92) 72%),
+        radial-gradient(circle at 70% 85%, rgba(0,0,0,.35), transparent 55%);
+      box-shadow: 0 10px 18px rgba(0,0,0,.35);
+      opacity:0;
+      transform: translateY(6px) scale(.96);
+      transition: opacity .10s ease, transform .10s ease;
+      pointer-events:none;
+    }
+    .pill.active .ball{
+      opacity:1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* label bar at the bottom (like your screenshot) */
+    .labelBar{
+      margin-top:auto;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.28);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+      padding: 9px 8px;
+      text-align:center;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: capitalize;
+      font-size: 15px;
+    }
+
+    /* PUTTS special: flag + number; ring lights when putts>0 */
+    .putts .flagWrap{
+      position:relative;
+      width: 56px;
+      height: 66px;
+    }
+    .putts .pole{
+      position:absolute;
+      left: 11px;
+      top: 8px;
+      width: 6px;
+      height: 50px;
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(255,255,255,.25));
+      box-shadow: 0 6px 12px rgba(0,0,0,.30);
+    }
+    .putts .flag{
+      position:absolute;
+      left: 16px;
+      top: 10px;
+      width: 34px;
+      height: 24px;
+      border-radius: 5px 6px 6px 5px;
+      border:1px solid rgba(0,0,0,.25);
+      box-shadow: 0 8px 14px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.25);
+      background: rgba(255,255,255,.60); /* default white */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+      color: rgba(0,0,0,.75);
+      font-size: 14px;
+      line-height:1;
+    }
+    .putts .flag.white { background: rgba(255,255,255,.75); color: rgba(0,0,0,.70); }
+    .putts .flag.gold  { background: linear-gradient(180deg, var(--gold), var(--gold2)); color:#120f07; }
+    .putts .flag.green { background: linear-gradient(180deg, #78f0a5, var(--green)); color:#062014; }
+    .putts .flag.red   { background: linear-gradient(180deg, #ff8a8a, var(--red)); color:#1b0606; }
+
+    /* second row pills can show icons later; for now a simple glyph */
+    .iconGlyph{
+      width: 54px;
+      height: 50px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 26px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      opacity:.9;
+    }
+
+    .subNote{
+      margin-top: 8px;
+      padding: 8px 0 0;
+      font-size: 12px;
+      opacity:.78;
+      line-height:1.35;
+    }
+
+    .kbd{
+      display:inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      font-weight:800;
+      letter-spacing:.04em;
+      margin: 0 2px;
+      white-space:nowrap;
+    }
+
+    /* Make it fit on smaller screens (390x844 target) */
+    @media (max-width: 380px){
+      :root{ --pillGap: 9px; --edgePad: 0px; }
+      .pill{ height: 160px; }
+      .pill .window{ height: 112px; }
+      .labelBar{ font-size: 14px; }
+    }
+  
+
+    /* --- Top layout revisions --- */
+    .metaRow{
+      margin-top: 8px;
+      display:grid;
+      grid-template-columns: 1fr; /* full width */
+      gap: 10px;
+      align-items:center;
+    }
+
+    .honorsWrap{
+      display:flex;
+      justify-content:center;
+      margin-top: 8px;
+    }
+
+    .honors{
+      width: 75%;
+      max-width: 320px;
+      border-radius: 14px;
+      padding: 9px 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--inner);
+      font-weight:900;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      user-select:none;
+      text-align:center;
+      min-width: 0;
+      position: relative;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .honors::before{
+      content:"";
+      position:absolute;
+      inset: 6px;
+      border-radius: 12px;
+      border:2px solid rgba(241,209,122,.18);
+      transition: border-color .15s ease, box-shadow .15s ease;
+      pointer-events:none;
+    }
+
+    .honors.active{
+      color: var(--gold);
+      text-shadow: 0 0 18px rgba(241,209,122,.22);
+      animation: honorsPulse 1.1s ease-in-out infinite;
+    }
+    .honors.active::before{
+      border-color: rgba(241,209,122,.62);
+      box-shadow: 0 0 26px rgba(241,209,122,.16);
+    }
+
+    @keyframes honorsPulse{
+      0%, 100%{ transform: scale(1); }
+      50%{ transform: scale(1.015); }
+    }
+
+    /* --- Combined player + stepper bar --- */
+    .playerRow{
+      margin-top: 8px;
+      display:grid;
+      grid-template-columns: 1fr; /* one combined bar */
+      gap: 10px;
+      align-items:center;
+    }
+
+    .playerBar{
+      border-radius: 14px;
+      padding: 10px 10px 10px 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--inner);
+      display:grid;
+      grid-template-columns: 1fr auto;
+      align-items:center;
+      gap: 10px;
+      min-height: 48px;
+    }
+
+    .playerBar .name{
+      font-weight: 950;
+      font-size: 18px;
+      line-height: 1.05;
+    }
+
+    .scoreMini{
+      padding: 0;
+      border: none;
+      background: transparent;
+      box-shadow: none;
+      gap: 8px;
+      justify-content:flex-end;
+    }
+
+    .miniBtn{
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+    }
+
+    .miniScore{
+      width: 42px;
+      font-size: 18px;
+    }
+
+    /* --- Finalize / Confirm button --- */
+    .finalizeWrap{
+      margin-top: 10px;
+      display:flex;
+      justify-content:center;
+      padding: 0 12px;
+    }
+
+    .finalizeBtn{
+      width: 75%;
+      max-width: 320px;
+      border-radius: 14px;
+      padding: 12px 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--inner);
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      text-align:center;
+      color: var(--ink);
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      position:relative;
+    }
+    .finalizeBtn::before{
+      content:"";
+      position:absolute;
+      inset: 6px;
+      border-radius: 12px;
+      border:2px solid rgba(241,209,122,.18);
+      pointer-events:none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .finalizeBtn.confirm{
+      color: var(--gold);
+    }
+    .finalizeBtn.confirm::before{
+      border-color: rgba(241,209,122,.62);
+      box-shadow: 0 0 26px rgba(241,209,122,.16);
+    }
+    .finalizeBtn:active{ transform: translateY(1px); }
+
+    /* --- Bottom nav (4 square buttons) --- */
+    .nav{
+      border-top:1px solid rgba(255,255,255,.06);
+      background: rgba(0,0,0,.28);
+      padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+    }
+    .navGrid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .navBtn{
+      height: 50px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      box-shadow: var(--inner);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      gap: 2px;
+      color: rgba(242,242,246,.90);
+      font-weight: 900;
+      letter-spacing:.02em;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .navBtn .ico{
+      font-size: 18px;
+      opacity:.95;
+      line-height: 1;
+    }
+    .navBtn .txt{
+      font-size: 11px;
+      opacity:.85;
+      text-transform: uppercase;
+      letter-spacing:.12em;
+    }
+    .navBtn.active{
+      color: var(--gold);
+      text-shadow: 0 0 18px rgba(241,209,122,.20);
+    }
+
+    /* make room: reduce bottom padding in .bottom since nav exists */
+    .bottom{
+      padding: 8px 16px 10px;
+    }
+
+    /* --- Shrink lower (tool) pills ~25% so screen doesn't scroll --- */
+    .pill.tool{
+      height: 128px; /* 170 * 0.75 */
+      padding: 10px 10px 10px;
+    }
+    .pill.tool .window{
+      height: 80px;
+      border-radius: 16px;
+    }
+    .pill.tool .labelBar{
+      padding: 8px 8px;
+      font-size: 14px;
+    }
+
+  </style>
 </head>
-<body data-page="app-player">
-  <a class="skip" href="#main">Skip to content</a>
-
-  <header class="topbar" role="banner">
-    <div class="wrap topbar__inner">
-      <div class="brand">
-        <a class="brand__link" href="/" aria-label="MaxSkins Home">
-          <span class="brand__mark" aria-hidden="true">⛳</span>
-          <span class="brand__word">MaxSkins</span>
-          <span class="brand__tag">Better Golf, Smarter Bets</span>
-        </a>
+<body>
+<div aria-label="MaxSkins Player Screen" class="phone">
+<!-- TOP HALF (placeholders; we will skin with real images later) -->
+<section aria-label="Top HUD" class="top">
+<div aria-label="Hero image placeholder" class="hero">MAXSKINS</div>
+<div class="metaRow"><div aria-label="Hole info" class="holePill">
+<span>HOLE <strong id="holeNum">6</strong></span>
+<span>PAR <strong id="holePar">4</strong></span>
+</div></div><div class="honorsWrap"><div class="honors" id="honorsPill">HONORS</div></div>
+<div class="playerRow"><div class="playerBar"><div><div class="name" id="playerName">John Smith</div></div><div aria-label="Quick score adjust" class="scoreMini">
+<button aria-label="Decrease score" class="miniBtn" id="scoreMinus">−</button>
+<div aria-live="polite" class="miniScore" id="scoreVal">0</div>
+<button aria-label="Increase score" class="miniBtn" id="scorePlus">+</button>
+</div></div></div>
+</section>
+<!-- BOTTOM HALF (the important 2x4 pill layout) -->
+<section aria-label="Quick stats entry" class="bottom">
+<div aria-label="Hole stats and tools" class="pillGrid" role="group">
+<!-- Row 1 -->
+<button aria-label="Fairway (toggle)" aria-pressed="false" class="pill stat" id="pillFairway" type="button">
+<div class="window">
+<div aria-hidden="true" class="ball"></div>
+</div>
+<div class="labelBar">Fairway</div>
+</button>
+<button aria-label="Sand (toggle)" aria-pressed="false" class="pill stat" id="pillSand" type="button">
+<div class="window">
+<div aria-hidden="true" class="ball"></div>
+</div>
+<div class="labelBar">Sand</div>
+</button>
+<button aria-label="Green (toggle)" aria-pressed="false" class="pill stat" id="pillGreen" type="button">
+<div class="window">
+<div aria-hidden="true" class="ball"></div>
+</div>
+<div class="labelBar">Green</div>
+</button>
+<button aria-label="Putts (tap to cycle 0 to 9, hold to reset)" class="pill putts" id="pillPutts" type="button">
+<div aria-hidden="true" class="window">
+<div class="flagWrap">
+<div class="pole"></div>
+<div class="flag white" id="puttFlag"><span id="puttNum" style="opacity:.85"></span></div>
+</div>
+</div>
+<div class="labelBar">Putts</div>
+</button>
+<!-- Row 2 -->
+<button aria-label="Penalty" class="pill tool" id="pillPenalty" type="button">
+<div class="window">
+<div aria-hidden="true" class="iconGlyph">+1</div>
+</div>
+<div class="labelBar">Penalty</div>
+</button>
+<button aria-label="Notes" class="pill tool" id="pillNotes" type="button">
+<div class="window">
+<div aria-hidden="true" class="iconGlyph">🎙️</div>
+</div>
+<div class="labelBar">Notes</div>
+</button>
+<button aria-label="Fairway AI" class="pill tool" id="pillFairwayAI" type="button">
+<div class="window">
+<div aria-hidden="true" class="iconGlyph">🎯</div>
+</div>
+<div class="labelBar">Fairway AI</div>
+</button>
+<button aria-label="Green AI" class="pill tool" id="pillGreenAI" type="button">
+<div class="window">
+<div aria-hidden="true" class="iconGlyph">🟩</div>
+</div>
+<div class="labelBar">Green AI</div>
+</button>
+</div>
+<div class="finalizeWrap"><button aria-label="Finalize Score" class="finalizeBtn" id="finalizeBtn" type="button">Finalize Score</button></div><div class="subNote">
+<span class="kbd">Tap</span> Fairway / Sand / Green to toggle the ball + ring.
+        <span class="kbd">Tap</span> Putts to cycle 0→9 (3+ stays red). <span class="kbd">Hold 1s</span> Putts to reset to 0.
       </div>
+</section><section aria-label="Bottom navigation" class="nav"><div class="navGrid"><button aria-label="Home" class="navBtn" id="navHome" type="button"><div class="ico">🏠</div><div class="txt">Home</div></button><button aria-label="Scores" class="navBtn" id="navScores" type="button"><div class="ico">📊</div><div class="txt">Scores</div></button><button aria-label="Rules" class="navBtn" id="navRules" type="button"><div class="ico">⚖️</div><div class="txt">Rules</div></button><button aria-label="Money" class="navBtn" id="navMoney" type="button"><div class="ico">💰</div><div class="txt">Money</div></button></div></section>
+</div>
+<script>
+    // -----------------------------
+    // Score mini controls (placeholder)
+    // -----------------------------
+    (function(){
+      const minus = document.getElementById('scoreMinus');
+      const plus  = document.getElementById('scorePlus');
+      const valEl = document.getElementById('scoreVal');
+      let score = 0;
+      function render(){ valEl.textContent = String(score); }
+      minus.addEventListener('click', () => { score = Math.max(0, score-1); render(); });
+      plus.addEventListener('click',  () => { score = Math.min(99, score+1); render(); });
+      render();
+    })();
 
-      <nav class="nav" aria-label="Primary">
-        <a class="nav__link is-active" href="/">Home</a>
-        <a class="nav__link" href="/features/">Features</a>
-        <a class="nav__link" href="/rules/">Rules</a>
-        <a class="nav__link" href="/pricing/">Pricing</a>
-        <a class="nav__link" href="/app/">App</a>
-        <a class="nav__link" href="/contact/">Contact</a>
-      </nav>
+    // -----------------------------
+    // Toggle pills (Fairway/Sand/Green) can all be ON together.
+    // Ball appears + ring glows.
+    // -----------------------------
+    function wireTogglePill(btn){
+      btn.addEventListener('click', () => {
+        const on = !btn.classList.contains('active');
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+    wireTogglePill(document.getElementById('pillFairway'));
+    wireTogglePill(document.getElementById('pillSand'));
+    wireTogglePill(document.getElementById('pillGreen'));
 
-      <div class="topbar__actions">
-        <a class="btn btn--ghost" href="/contact/">Get Updates</a>
-        <a class="btn btn--primary" href="features.html#try">Try Demo</a>
-      </div>
-    </div>
-  </header>
+    // -----------------------------
+    // Putts pill:
+    // - Tap cycles 0..9, then loops
+    // - 0 => white (neutral), no number shown
+    // - 1 => gold, number 1
+    // - 2 => green, number 2
+    // - 3..9 => red, number
+    // - Ring glows when putts > 0
+    // - Hold 1s => reset to 0 (prevents "fat finger" pain without adding a reset button)
+    // -----------------------------
+    (function(){
+      const pill = document.getElementById('pillPutts');
+      const flag = document.getElementById('puttFlag');
+      const num  = document.getElementById('puttNum');
 
-  <main class="container" id="main" style="padding-top:24px;">
-    <section class="hero">
-      <h1 class="hero__title">Player Screen — Locked Spec</h1>
-      <p class="hero__subtitle">This is the authoritative spec snapshot from the hard-lock export.</p>
-      <div class="cta-row">
-        <a class="btn" href="/app/">← Back to App</a>
-      </div>
-    </section>
+      let putts = 0;
 
-    <section class="card" style="margin-top:18px;">
-      <h2 class="card__title">Export (verbatim)</h2>
-      <pre class="pre" style="white-space:pre-wrap; line-height:1.3;">MAXSKINS – PLAYER SCREEN HARD LOCK Session Export Timestamp: 2026-02-11
-21:19
+      function setFlagClass(cls){
+        flag.classList.remove('white','gold','green','red');
+        flag.classList.add(cls);
+      }
 
-============================================================ IDENTITY
-FOUNDATION (PROTECTED)
-============================================================
+      function render(){
+        if (putts === 0){
+          setFlagClass('white');
+          num.textContent = '';
+          pill.classList.remove('active'); // ring off
+          pill.setAttribute('aria-label', 'Putts (neutral). Tap to set putts. Hold 1s to reset.');
+        } else if (putts === 1){
+          setFlagClass('gold');
+          num.textContent = '1';
+          pill.classList.add('active'); // ring on
+          pill.setAttribute('aria-label', 'Putts: 1 (gold). Tap to change. Hold 1s to reset.');
+        } else if (putts === 2){
+          setFlagClass('green');
+          num.textContent = '2';
+          pill.classList.add('active');
+          pill.setAttribute('aria-label', 'Putts: 2 (green). Tap to change. Hold 1s to reset.');
+        } else {
+          setFlagClass('red');
+          num.textContent = String(putts);
+          pill.classList.add('active');
+          pill.setAttribute('aria-label', 'Putts: ' + putts + ' (red). Tap to change. Hold 1s to reset.');
+        }
+      }
 
-• “Most reliable club in the bag.” • Reliability over flash. • No AI
-score manipulation ever. • Player accountability is absolute. •
-Scorekeeper is final authority.
+      function increment(){
+        putts = (putts + 1) % 10; // 0..9 loop
+        render();
+      }
 
-============================================================ PLAYER
-SCREEN – STRUCTURE (FINAL)
-============================================================
+      function reset(){
+        putts = 0;
+        render();
+      }
 
-TOP HEADER
+      let holdTimer = null;
+      let held = false;
 
-• Player Name (single player only) • Hole number + Par • Mode badge
-(Buddy / Serious) • Status badge: - Draft - Submitted - Edit Required -
-Locked
+      pill.addEventListener('pointerdown', (e) => {
+        held = false;
+        // Start hold-to-reset timer
+        holdTimer = window.setTimeout(() => {
+          held = true;
+          reset();
+          // prevent accidental click after hold on some browsers
+        }, 1000);
+      });
 
-SCORE STEPPER
+      function clearHold(){
+        if (holdTimer){
+          clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+      }
 
-• Large centered score display. • + and – buttons manually adjust hole
-total. • This is the ONLY control that changes hole total. • Penalty
-does NOT auto-adjust score.
+      pill.addEventListener('pointerup', (e) => {
+        clearHold();
+        if (!held){
+          increment();
+        }
+      });
 
-STAT CAPSULES (8 IDENTICAL COMPONENTS)
+      pill.addEventListener('pointercancel', clearHold);
+      pill.addEventListener('pointerleave', clearHold);
 
-All 8 capsules are visually identical in size, depth, frame, and
-lighting.
+      // Also support keyboard
+      pill.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          increment();
+        }
+        if (e.key === 'Backspace' || e.key === 'Escape'){
+          e.preventDefault();
+          reset();
+        }
+      });
 
-TOP ROW: 1. Fairway 2. Sand 3. Green 4. Putts
+      render();
+    })();
 
-BOTTOM ROW: 5. Penalty 6. Notes 7. AI Fairway 8. AI Green
+    // -----------------------------
+    // Row 2 placeholder actions (we'll wire later)
+    // -----------------------------
+    document.getElementById('pillPenalty').addEventListener('click', () => alert('Penalty (wire later)'));
+    document.getElementById('pillNotes').addEventListener('click', () => alert('Notes (wire later)'));
+    document.getElementById('pillFairwayAI').addEventListener('click', () => alert('Fairway AI (wire later)'));
+    document.getElementById('pillGreenAI').addEventListener('click', () => alert('Green AI (wire later)'));
+  
 
-RULE: Images NEVER change between states. Only overlays change (ball,
-glow, number, flag color).
+    // -----------------------------
+    // Honors pill: tap to toggle "has honors" (demo behavior).
+    // In production, scorer/round state will control this.
+    // -----------------------------
+    (function(){
+      const honors = document.getElementById('honorsPill');
+      if (!honors) return;
+      honors.addEventListener('click', () => {
+        honors.classList.toggle('active');
+      });
+    })();
 
-PUTTS LOGIC (LOCKED)
+    // -----------------------------
+    // Finalize Score: two-tap safety
+    // Tap 1 => "Confirm"
+    // Tap 2 => send to scorekeeper (placeholder), then revert
+    // -----------------------------
+    (function(){
+      const btn = document.getElementById('finalizeBtn');
+      if (!btn) return;
+      let armed = false;
+      let timer = null;
 
-Tap cycle: 0 – White flag 1 – Gold flag 2 – Green flag 3 – Red flag 4–5
-– Dark red Next tap resets to white.
+      function disarm(){
+        armed = false;
+        btn.classList.remove('confirm');
+        btn.textContent = 'Finalize Score';
+        if (timer){ clearTimeout(timer); timer = null; }
+      }
 
-PENALTY LOGIC (LOCKED)
+      btn.addEventListener('click', () => {
+        if (!armed){
+          armed = true;
+          btn.classList.add('confirm');
+          btn.textContent = 'Confirm';
+          // auto-cancel if user doesn’t confirm quickly
+          timer = setTimeout(disarm, 4000);
+          return;
+        }
+        // second tap = "send"
+        disarm();
+        alert('Sent to scorekeeper (wire later)');
+      });
+    })();
 
-• Tap = +1 penalty. • Red intensity increases first 1–3 taps. • After 3,
-color stays strong red, number increments. • AI never adds strokes. • On
-first tap (0→1), show toast: “Need the ruling? Yes / No” • If Yes →
-advisory modal opens. • AI explains only. Player must manually adjust
-score.
-
-NOTES
-
-• Private to player. • Not synced to main feed. • Not deleted by Reset
-Hole.
-
-AI RULES OFFICIAL (HARD LOCK)
-
-• Advisory only. • Cannot add strokes. • Cannot remove strokes. • Cannot
-modify totals. • Cannot modify penalties. • Cannot override anything. •
-Ends advice with: “If that applies, use the Penalty button.”
-
-BOTTOM CONTROL BAR
-
-• Undo Last • Submit Hole • Reset Hole (long-press protected)
-
-SUBMIT FLOW
-
-• Submit = soft lock. • Player can re-edit until scorekeeper locks. • If
-edited after submit → EDITED marker triggered.
-
-DISCREPANCY SYSTEM
-
-• Scorekeeper can flag Discrepancy. • Player sees “Edit Required.” •
-Player edits and re-submits. • Any change logs edit history.
-
-EDIT AUDIT (HOLE TOTAL ONLY)
-
-Tracked: • Previous total • New total • Delta (+/-) • Edit count
-
-Displayed on scorecard: 4 → 5 (+1)
-
-RESET HOLE (FINAL DEFINITION)
-
-• Clears current hole scoring inputs. • Clears submission flag. • Does
-NOT delete notes. • Does NOT delete prior hole data.
-
-VISUAL LOCK
-
-• One master capsule component duplicated 8 times. • No alternate
-capsule designs. • No visual drift. • No different lighting between
-capsules. • Player screen uses accent color. • Scorekeeper screen uses
-gold authority.
-
-FUTURE (PARKED)
-
-• Tournament / Volunteer Live Scoring Mode parked in Vault 7. • Not
-active in Phase 1.
-
-============================================================ STATUS
-============================================================
-
-Player Screen Architecture: HARD LOCKED. AI Authority Limits: HARD
-LOCKED. Penalty + Putts Logic: HARD LOCKED. Discrepancy + Edit Audit:
-HARD LOCKED. Visual Capsule Consistency: HARD LOCKED.
-
-End of Export.
-</pre>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <div class="container">
-      <small>Player Screen spec is hard-locked. Any changes must be deliberate and versioned.</small>
-    </div>
-  </footer>
-
-  <script src="/assets/js/main.js"></script>
+    // -----------------------------
+    // Bottom nav: simple active state (placeholder)
+    // -----------------------------
+    (function(){
+      const ids = ['navHome','navScores','navRules','navMoney'];
+      const btns = ids.map(id => document.getElementById(id)).filter(Boolean);
+      function setActive(id){
+        btns.forEach(b => b.classList.toggle('active', b.id === id));
+      }
+      btns.forEach(b => b.addEventListener('click', () => setActive(b.id)));
+      setActive('navHome');
+    })();
+</script>
 </body>
 </html>
