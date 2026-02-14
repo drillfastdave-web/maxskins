@@ -3,663 +3,758 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0b0b0b" />
   <title>MaxSkins — Player Screen</title>
 
-  <!-- MAXSKINS PLAYER — PROD V5 FRESH (2026-02-13) -->
-  <!-- Fingerprint: PLAYER_V5_FRESH_20260213_01 -->
+  <!-- MAXSKINS_PLAYER_INDEX_PROD_V6_RAILS | 2026-02-14 03:23
+       Fingerprint: PLAYER::V6_RAILS
+       Notes: Restores 4 vertical rails (Fairway/Sand/Green/Putts). Removes floating logo + game indicator pills.
+  -->
+
+  <link rel="icon" href="/assets/img/MSG_Logo.png" />
 
   <style>
-    /* --- Reset / base --- */
-    *,*::before,*::after{box-sizing:border-box}
-    html,body{height:100%;margin:0}
-    body{
-      background:#0b0b0b;
-      color:#e9e9e9;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      display:flex;
-      justify-content:center;
-      align-items:flex-start;
-      padding:12px 10px 18px;
-      overflow-x:hidden;
+    /* ---------------------------
+       MaxSkins Player Screen (PROD V6_RAILS)
+       Goal: deterministic layout, no "ghost" UI
+    ---------------------------- */
+
+    :root {
+      --bg: #0b0b0b;
+      --panel: rgba(255,255,255,0.06);
+      --panel2: rgba(255,255,255,0.08);
+      --stroke: rgba(255,255,255,0.12);
+      --stroke2: rgba(255,255,255,0.18);
+      --gold: #d9b45e;
+      --gold2: #a8843d;
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.60);
+      --shadow: 0 18px 60px rgba(0,0,0,0.55);
+
+      --radius: 22px;
+      --radiusSm: 14px;
+
+      --isoW: 390px;
+      --isoH: 844px;
     }
 
-    /* Lock the UI into a phone canvas (matches your current pattern) */
-    .msIsoStage{
-      width:390px;
-      min-height:844px;
-      padding:14px 12px 16px;
-      border-radius:22px;
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    /* Center + scale the deterministic phone canvas */
+    body {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 16px 10px;
+      box-sizing: border-box;
+    }
+
+    #msIsoStage {
+      width: var(--isoW);
+      height: var(--isoH);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
       background:
-        radial-gradient(120% 90% at 50% 0%, rgba(30,30,30,.9), rgba(10,10,10,.92) 55%, rgba(0,0,0,.95));
-      box-shadow: 0 18px 60px rgba(0,0,0,.65), inset 0 0 0 1px rgba(255,255,255,.06);
-      position:relative;
+        radial-gradient(120% 60% at 50% 0%, rgba(217,180,94,0.10), rgba(0,0,0,0) 60%),
+        radial-gradient(120% 60% at 50% 110%, rgba(14, 110, 74, 0.12), rgba(0,0,0,0) 60%),
+        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.0));
+      border: 1px solid rgba(255,255,255,0.10);
+      position: relative;
+      transform-origin: top center;
+      transform: scale(var(--msScale, 1));
     }
 
-    /* Tiny visible fingerprint (for “why am I still seeing old?”) */
-    .buildTag{
-      position:absolute;
-      top:10px;
-      right:12px;
-      font-size:10px;
-      letter-spacing:.12em;
-      opacity:.5;
-      user-select:none;
-      pointer-events:none;
+    @media (max-width: 420px) {
+      #msIsoStage {
+        --msScale: calc((100vw - 20px) / 390);
+      }
     }
 
-    /* Brand header */
-    .brand{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:10px 10px 8px;
-      border-radius:16px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    @media (max-height: 900px) {
+      #msIsoStage {
+        --msScale: min(var(--msScale, 1), calc((100vh - 28px) / 844));
+      }
     }
-    .brandLeft{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
+
+    /* Safe-area padding wrapper */
+    .screen {
+      position: absolute;
+      inset: 0;
+      padding: 14px 14px calc(14px + env(safe-area-inset-bottom)) 14px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-    .logoWrap{
-      width:84px; /* shrunk so it fits clean */
-      height:44px;
-      border-radius:12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background: rgba(0,0,0,.35);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-      overflow:hidden;
-      flex:0 0 auto;
+
+    /* Top brand bar */
+    .topBar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
     }
-    .logoWrap img{
-      width:100%;
-      height:100%;
-      object-fit:contain;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand img {
+      height: 38px;        /* SHRUNK to fit properly */
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.55));
+    }
+
+    .brandText {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+      min-width: 0;
+    }
+
+    .brandText .title {
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: rgba(255,255,255,0.92);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brandText .sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.62);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pillTag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(14,110,74,0.20);
+      border: 1px solid rgba(14,110,74,0.40);
+      color: rgba(255,255,255,0.92);
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      font-size: 11px;
+    }
+
+    /* Hole header */
+    .holeRow {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .holeBadge {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.10);
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      font-size: 12px;
+    }
+
+    .miniInfo {
+      font-size: 11px;
+      color: rgba(255,255,255,0.55);
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    /* Honors bar */
+    .honors {
+      padding: 10px 12px;
+      border-radius: 16px;
+      text-align: center;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.90);
+      background: linear-gradient(180deg, rgba(217,180,94,0.12), rgba(255,255,255,0.02));
+      border: 1px solid rgba(217,180,94,0.22);
+    }
+
+    /* Player row */
+    .playerRow {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .playerName {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.3px;
+      line-height: 1.05;
+    }
+
+    .scoreStepper {
+      display: inline-grid;
+      grid-template-columns: 42px 44px 42px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .stepBtn, .scoreBox {
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.92);
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .stepBtn {
+      cursor: pointer;
+    }
+
+    .stepBtn:active {
       transform: translateY(1px);
     }
-    .brandText{
-      min-width:0;
-      line-height:1.05;
-    }
-    .brandText .title{
-      font-weight:800;
-      letter-spacing:.08em;
-      font-size:18px;
-      color:#d8b96a;
-      text-shadow: 0 2px 10px rgba(0,0,0,.65);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .brandText .sub{
-      font-size:11px;
-      opacity:.75;
-      letter-spacing:.06em;
-      margin-top:4px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .badge{
-      flex:0 0 auto;
-      font-size:11px;
-      padding:6px 10px;
-      border-radius:999px;
-      background: rgba(20,80,40,.22);
-      color:#b8f0c9;
-      box-shadow: inset 0 0 0 1px rgba(80,200,120,.22);
-      letter-spacing:.08em;
-      font-weight:700;
+
+    .scoreBox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* Hole row */
-    .holeRow{
-      margin-top:10px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .pill{
-      border-radius:999px;
-      padding:8px 12px;
-      background: rgba(255,255,255,.05);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-      font-size:12px;
-      letter-spacing:.08em;
-      font-weight:800;
-    }
-    .pill strong{color:#d8b96a}
-    .pillSmall{
-      padding:8px 10px;
-      min-width:92px;
-      text-align:center;
+    /* 4-rail area */
+    .rails {
+      flex: 1;
+      min-height: 360px;
+      padding: 12px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    /* Honors */
-    .honors{
-      margin-top:10px;
-      display:flex;
-      justify-content:center;
-    }
-    .honorsBtn{
-      width:100%;
-      border:0;
-      background: rgba(0,0,0,.35);
-      color:#e7e7e7;
-      font-weight:800;
-      letter-spacing:.14em;
-      padding:10px 12px;
-      border-radius:999px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
-      cursor:pointer;
-    }
-    .honorsBtn.on{
-      background: rgba(40,120,70,.26);
-      box-shadow: inset 0 0 0 1px rgba(120,240,170,.22), 0 10px 25px rgba(0,0,0,.35);
-    }
-
-    /* Player row + score */
-    .playerCard{
-      margin-top:12px;
-      border-radius:18px;
-      padding:12px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-    }
-    .nameRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-    .playerName{
-      font-size:18px;
-      font-weight:900;
-      letter-spacing:.02em;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-    .scoreStepper{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex:0 0 auto;
-    }
-    .stepBtn{
-      width:42px;height:36px;
-      border-radius:10px;
-      border:0;
-      cursor:pointer;
-      background: rgba(255,255,255,.06);
-      color:#eaeaea;
-      font-weight:900;
-      font-size:18px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
-    }
-    .stepBtn:active{transform:translateY(1px)}
-    .scoreVal{
-      min-width:26px;
-      text-align:center;
-      font-weight:900;
-      font-size:18px;
-      letter-spacing:.08em;
-      opacity:.95;
-    }
-    .scoreVal.blank{opacity:.35}
-    .scoreVal.locked{color:#d8b96a}
-
-    /* Actions grid */
-    .grid{
-      margin-top:12px;
-      display:grid;
+    .railsGrid {
+      display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap:10px;
+      gap: 10px;
+      align-items: end;
     }
-    .bigBtn{
-      height:88px;
-      border-radius:16px;
-      border:0;
-      background: rgba(255,255,255,.05);
-      color:#eaeaea;
-      font-weight:900;
-      letter-spacing:.02em;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.07);
-      cursor:pointer;
-      position:relative;
-      overflow:hidden;
+
+    .rail {
+      height: 240px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.0));
+      border: 1px solid rgba(255,255,255,0.10);
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.35);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 10px;
+      box-sizing: border-box;
+      cursor: pointer;
+      user-select: none;
     }
-    .bigBtn .label{
-      position:absolute;
-      left:10px; right:10px;
-      bottom:10px;
-      font-size:12px;
-      letter-spacing:.08em;
-      opacity:.9;
-      text-align:center;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+
+    .rail::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(70% 50% at 50% 0%, rgba(217,180,94,0.10), rgba(0,0,0,0) 62%),
+        radial-gradient(70% 50% at 50% 110%, rgba(14,110,74,0.10), rgba(0,0,0,0) 62%);
+      opacity: 0.9;
+      pointer-events: none;
     }
-    .bigBtn .icon{
-      position:absolute;
-      top:16px;
-      left:50%;
-      transform:translateX(-50%);
-      opacity:.9;
-      font-size:18px;
-      font-weight:900;
+
+    .railInner {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.18);
+      border: 1px solid rgba(255,255,255,0.08);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .bigBtn.on{
-      background: rgba(40,120,70,.25);
-      box-shadow: inset 0 0 0 1px rgba(120,240,170,.22), 0 14px 28px rgba(0,0,0,.35);
+
+    .railIcon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      letter-spacing: 0.8px;
+      font-size: 16px;
+      position: relative;
     }
-    .bigBtn.warn{
-      background: rgba(150,40,40,.22);
-      box-shadow: inset 0 0 0 1px rgba(255,120,120,.18), 0 14px 28px rgba(0,0,0,.35);
+
+    .railLabel {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      color: rgba(255,255,255,0.88);
     }
-    .bigBtn.ai{
-      background: rgba(80,80,80,.14);
+
+    /* Active rings */
+    .rail.active {
+      border-color: rgba(217,180,94,0.30);
+      box-shadow:
+        inset 0 0 0 1px rgba(217,180,94,0.12),
+        0 10px 26px rgba(0,0,0,0.55);
+    }
+
+    .rail.active .railIcon {
+      border-color: rgba(217,180,94,0.40);
+      box-shadow: 0 0 0 2px rgba(217,180,94,0.16);
+    }
+
+    /* Putts status colors */
+    .putts1 .railIcon { box-shadow: 0 0 0 2px rgba(217,180,94,0.22); }
+    .putts2 .railIcon { box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.22); }
+    .putts3 .railIcon { box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.24); }
+
+    /* Second row: small actions */
+    .actionsRow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      align-items: center;
+    }
+
+    .miniBtn {
+      height: 74px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .miniBtn .miniIcon {
+      width: 36px;
+      height: 36px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.18);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    .miniBtn .miniLabel {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      color: rgba(255,255,255,0.85);
+      text-align: center;
+      line-height: 1.05;
+    }
+
+    .miniBtn:active {
+      transform: translateY(1px);
     }
 
     /* Submit */
-    .submitWrap{
-      margin-top:12px;
-      display:flex;
-      justify-content:center;
-    }
-    .submitBtn{
-      width:100%;
-      border:0;
-      border-radius:999px;
-      padding:12px 14px;
-      font-weight:1000;
-      letter-spacing:.12em;
-      background: rgba(255,255,255,.06);
-      color:#f0f0f0;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
-      cursor:pointer;
-    }
-    .submitBtn.armed{
-      background: rgba(40,120,70,.26);
-      box-shadow: inset 0 0 0 1px rgba(120,240,170,.22), 0 16px 35px rgba(0,0,0,.35);
+    .submitWrap {
+      padding-top: 2px;
     }
 
-    /* Help text */
-    .help{
-      margin-top:10px;
-      font-size:11px;
-      opacity:.7;
-      line-height:1.25;
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
+    .submitBtn {
+      width: 100%;
+      height: 54px;
+      border-radius: 999px;
+      border: 1px solid rgba(217,180,94,0.26);
+      background: linear-gradient(180deg, rgba(217,180,94,0.14), rgba(255,255,255,0.03));
+      color: rgba(255,255,255,0.92);
+      font-weight: 950;
+      letter-spacing: 1px;
+      cursor: pointer;
     }
-    .chip{
-      font-size:10px;
-      padding:4px 8px;
-      border-radius:999px;
-      background: rgba(255,255,255,.06);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.07);
-      letter-spacing:.06em;
-      opacity:.9;
+
+    .submitBtn:active {
+      transform: translateY(1px);
+    }
+
+    .helper {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.56);
+      padding: 2px 4px 0 4px;
     }
 
     /* Bottom nav */
-    .nav{
-      position:sticky;
-      bottom:0;
-      margin-top:14px;
-      padding-top:12px;
-    }
-    .navInner{
-      display:grid;
+    .bottomNav {
+      display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap:10px;
-      padding:10px;
-      border-radius:18px;
-      background: rgba(255,255,255,.04);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-    }
-    .navBtn{
-      border:0;
-      border-radius:12px;
-      padding:10px 8px;
-      font-size:11px;
-      letter-spacing:.12em;
-      font-weight:900;
-      background: rgba(0,0,0,.35);
-      color:#eaeaea;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-      cursor:pointer;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      align-items:center;
-      justify-content:center;
-    }
-    .navBtn .ico{font-size:14px; opacity:.9}
-    .navBtn.active{
-      background: rgba(40,120,70,.20);
-      box-shadow: inset 0 0 0 1px rgba(120,240,170,.18);
+      gap: 10px;
+      padding: 10px 10px 8px 10px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
     }
 
-    /* Mobile scale helper (keeps it sane on smaller viewports) */
-    @media (max-width: 410px){
-      .msIsoStage{ transform: scale(.98); transform-origin: top center; }
+    .navBtn {
+      height: 52px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      color: rgba(255,255,255,0.88);
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .navBtn.active {
+      border-color: rgba(14,110,74,0.42);
+      background: rgba(14,110,74,0.16);
+      box-shadow: 0 0 0 2px rgba(14,110,74,0.10);
+    }
+
+    .navIcon {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    /* Tiny dev label (non-intrusive) */
+    .devTag {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.6px;
+      pointer-events: none;
     }
   </style>
 </head>
 
 <body>
-  <div class="msIsoStage" data-ms-player="1">
-    <div class="buildTag">PLAYER_V5_FRESH</div>
+  <div id="msIsoStage" data-ms-player="1">
+    <div class="devTag">PLAYER::V6_RAILS</div>
 
-    <header class="brand">
-      <div class="brandLeft">
-        <div class="logoWrap" aria-label="MaxSkins logo">
-          <img src="/assets/img/MSG_LOGO.png" alt="MSG" />
+    <div class="screen" id="playerScreen">
+      <div class="topBar">
+        <div class="brand" aria-label="MaxSkins brand">
+          <img src="/assets/img/MSG_Logo.png" alt="MSG MaxSkins Golf" />
+          <div class="brandText">
+            <div class="title">MSG</div>
+            <div class="sub">MaxSkins Golf — Player</div>
+          </div>
         </div>
-        <div class="brandText">
-          <div class="title">MSG</div>
-          <div class="sub">MaxSkins Golf • Player</div>
-        </div>
+        <div class="pillTag" aria-label="mode">PLAYER</div>
       </div>
-      <div class="badge" id="phaseBadge">PLAYER</div>
-    </header>
 
-    <div class="holeRow">
-      <div class="pill pillSmall"><strong>HOLE</strong> <span id="holeNum">6</span></div>
-      <div class="pill pillSmall"><strong>PAR</strong> <span id="holePar">4</span></div>
-    </div>
+      <div class="holeRow">
+        <div class="holeBadge" aria-label="hole info">
+          <span id="holeLabel">HOLE 6</span>
+          <span id="parLabel">PAR 4</span>
+        </div>
+        <div class="miniInfo" aria-label="status">Round: 1/18</div>
+      </div>
 
-    <div class="honors">
-      <button class="honorsBtn" id="btnHonors" type="button">HONORS</button>
-    </div>
+      <div class="honors" id="honorsBar">HONORS</div>
 
-    <section class="playerCard">
-      <div class="nameRow">
+      <div class="playerRow" aria-label="player row">
         <div class="playerName" id="playerName">John Smith</div>
-        <div class="scoreStepper">
-          <button class="stepBtn" id="btnMinus" type="button" aria-label="Minus">−</button>
-          <div class="scoreVal blank" id="scoreVal">—</div>
-          <button class="stepBtn" id="btnPlus" type="button" aria-label="Plus">+</button>
+
+        <div class="scoreStepper" aria-label="score stepper">
+          <button class="stepBtn" id="scoreMinus" type="button" aria-label="minus">−</button>
+          <div class="scoreBox" id="scoreValue" aria-label="score">4</div>
+          <button class="stepBtn" id="scorePlus" type="button" aria-label="plus">+</button>
         </div>
       </div>
 
-      <div class="grid" aria-label="Player stats">
-        <button class="bigBtn" id="btnFairway" type="button" aria-pressed="false">
-          <div class="icon">⛳</div><div class="label">Fairway</div>
-        </button>
-        <button class="bigBtn" id="btnSand" type="button" aria-pressed="false">
-          <div class="icon">▧</div><div class="label">Sand</div>
-        </button>
-        <button class="bigBtn" id="btnGreen" type="button" aria-pressed="false">
-          <div class="icon">●</div><div class="label">Green</div>
-        </button>
-        <button class="bigBtn" id="btnPutts" type="button" aria-pressed="false">
-          <div class="icon" id="puttsIcon">⚑</div><div class="label">Putts</div>
-        </button>
+      <div class="rails" aria-label="player stats">
+        <div class="railsGrid">
+          <div class="rail" id="railFairway" role="button" tabindex="0" aria-label="Fairway">
+            <div class="railInner">
+              <div class="railIcon">⛳</div>
+            </div>
+            <div class="railLabel">Fairway</div>
+          </div>
 
-        <button class="bigBtn" id="btnPenalty" type="button">
-          <div class="icon">+1</div><div class="label">Penalty</div>
-        </button>
-        <button class="bigBtn" id="btnNotes" type="button">
-          <div class="icon">🎤</div><div class="label">Notes</div>
-        </button>
-        <button class="bigBtn ai" id="btnFairwayAI" type="button">
-          <div class="icon">🎯</div><div class="label">Fairway AI</div>
-        </button>
-        <button class="bigBtn ai" id="btnGreenAI" type="button">
-          <div class="icon">🟩</div><div class="label">Green AI</div>
-        </button>
+          <div class="rail" id="railSand" role="button" tabindex="0" aria-label="Sand">
+            <div class="railInner">
+              <div class="railIcon">▦</div>
+            </div>
+            <div class="railLabel">Sand</div>
+          </div>
+
+          <div class="rail" id="railGreen" role="button" tabindex="0" aria-label="Green">
+            <div class="railInner">
+              <div class="railIcon">●</div>
+            </div>
+            <div class="railLabel">Green</div>
+          </div>
+
+          <div class="rail" id="railPutts" role="button" tabindex="0" aria-label="Putts">
+            <div class="railInner">
+              <div class="railIcon">🏁</div>
+            </div>
+            <div class="railLabel">Putts</div>
+          </div>
+        </div>
+
+        <div class="actionsRow" aria-label="actions">
+          <div class="miniBtn" id="btnPenalty" role="button" tabindex="0" aria-label="Penalty">
+            <div class="miniIcon">+1</div>
+            <div class="miniLabel">Penalty</div>
+          </div>
+
+          <div class="miniBtn" id="btnNotes" role="button" tabindex="0" aria-label="Notes">
+            <div class="miniIcon">🎙</div>
+            <div class="miniLabel">Notes</div>
+          </div>
+
+          <div class="miniBtn" id="btnFairwayAI" role="button" tabindex="0" aria-label="Fairway AI">
+            <div class="miniIcon">🎯</div>
+            <div class="miniLabel">Fairway<br/>AI</div>
+          </div>
+
+          <div class="miniBtn" id="btnGreenAI" role="button" tabindex="0" aria-label="Green AI">
+            <div class="miniIcon">▣</div>
+            <div class="miniLabel">Green<br/>AI</div>
+          </div>
+        </div>
+
+        <div class="submitWrap">
+          <button class="submitBtn" id="btnSubmit" type="button">SUBMIT SCORE</button>
+          <div class="helper">
+            <div>Tap Fairway / Sand / Green to toggle.</div>
+            <div>Putts cycles 0→1→2→3+ (hold 1s = reset).</div>
+          </div>
+        </div>
       </div>
 
-      <div class="submitWrap">
-        <button class="submitBtn" id="btnSubmit" type="button">SUBMIT SCORE</button>
+      <div class="bottomNav" aria-label="bottom navigation">
+        <button class="navBtn active" id="navHome" type="button"><div class="navIcon">🏠</div>HOME</button>
+        <button class="navBtn" id="navScores" type="button"><div class="navIcon">📊</div>SCORES</button>
+        <button class="navBtn" id="navRules" type="button"><div class="navIcon">📜</div>RULES</button>
+        <button class="navBtn" id="navMoney" type="button"><div class="navIcon">💰</div>MONEY</button>
       </div>
-
-      <div class="help">
-        <span class="chip">Tap</span> Fairway / Sand / Green toggles.
-        <span class="chip">Tap</span> Putts cycles 0–9 (3+ shows red). <span class="chip">Hold 1s</span> resets Putts.
-        <span class="chip">Rule</span> Score shows <b>—</b> until submitted (never 0).
-      </div>
-    </section>
-
-    <nav class="nav" aria-label="Bottom navigation">
-      <div class="navInner">
-        <button class="navBtn active" id="navHome" type="button"><div class="ico">🏠</div>HOME</button>
-        <button class="navBtn" id="navScores" type="button"><div class="ico">📊</div>SCORES</button>
-        <button class="navBtn" id="navRules" type="button"><div class="ico">⚖️</div>RULES</button>
-        <button class="navBtn" id="navMoney" type="button"><div class="ico">💰</div>MONEY</button>
-      </div>
-    </nav>
+    </div>
   </div>
 
   <script>
-    // ----------------------------
-    // Player Screen V5 Fresh Logic
-    // ----------------------------
-    const $ = (id) => document.getElementById(id);
+    // -----------------------------
+    // MaxSkins Player Screen (PROD V6_RAILS)
+    // Fingerprint: PLAYER::V6_RAILS
+    // -----------------------------
 
-    const state = {
-      honors: false,
-      fairway: false,
-      sand: false,
-      green: false,
-      putts: null,          // null = not set (shows "—" on submit summary)
-      penalty: 0,
-      score: null,          // null = blank (shows "—" in UI)
-      submitted: false,
-      submitArmed: false,
-    };
+    // Score stepper (visual only for now)
+    (function() {
+      const scoreEl = document.getElementById('scoreValue');
+      const minus = document.getElementById('scoreMinus');
+      const plus  = document.getElementById('scorePlus');
 
-    function setPressed(btnId, on){
-      const el = $(btnId);
-      el.classList.toggle('on', !!on);
-      el.setAttribute('aria-pressed', !!on);
-    }
+      function getScore() {
+        const n = parseInt(scoreEl.textContent || '0', 10);
+        return Number.isFinite(n) ? n : 0;
+      }
+      function setScore(n) {
+        scoreEl.textContent = String(Math.max(0, n));
+      }
 
-    function renderScore(){
-      const el = $('scoreVal');
-      const isBlank = (state.score === null);
-      el.classList.toggle('blank', isBlank);
-      el.textContent = isBlank ? '—' : String(state.score);
-      el.classList.toggle('locked', state.submitted);
-    }
+      minus.addEventListener('click', () => setScore(getScore() - 1));
+      plus.addEventListener('click', () => setScore(getScore() + 1));
+    })();
 
-    function cyclePutts(){
-      // Putts cycle: null -> 0 -> 1 -> ... -> 9 -> null
-      if (state.putts === null) state.putts = 0;
-      else if (state.putts >= 9) state.putts = null;
-      else state.putts += 1;
+    // Rail toggles
+    (function() {
+      const railFairway = document.getElementById('railFairway');
+      const railSand    = document.getElementById('railSand');
+      const railGreen   = document.getElementById('railGreen');
+      const railPutts   = document.getElementById('railPutts');
 
-      // Visual rule: 3+ shows red
-      const btn = $('btnPutts');
-      btn.classList.toggle('warn', (state.putts !== null && state.putts >= 3));
-      // Flag icon subtle state cue
-      $('puttsIcon').textContent = (state.putts === null) ? '⚑' : String(state.putts);
-      btn.querySelector('.label').textContent = (state.putts === null) ? 'Putts' : `Putts: ${state.putts}`;
-    }
+      // Non-exclusive: Fairway/Sand/Green can all be active simultaneously
+      function toggleActive(el) {
+        el.classList.toggle('active');
+      }
 
-    function resetPutts(){
-      state.putts = null;
-      const btn = $('btnPutts');
-      btn.classList.remove('warn');
-      $('puttsIcon').textContent = '⚑';
-      btn.querySelector('.label').textContent = 'Putts';
-    }
+      function keyAsClick(el) {
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            el.click();
+          }
+        });
+      }
 
-    function disarmSubmit(){
-      state.submitArmed = false;
-      const btn = $('btnSubmit');
-      btn.classList.remove('armed');
-      btn.textContent = 'SUBMIT SCORE';
-    }
+      railFairway.addEventListener('click', () => toggleActive(railFairway));
+      railSand.addEventListener('click', () => toggleActive(railSand));
+      railGreen.addEventListener('click', () => toggleActive(railGreen));
+      keyAsClick(railFairway); keyAsClick(railSand); keyAsClick(railGreen);
 
-    function armSubmit(){
-      state.submitArmed = true;
-      const btn = $('btnSubmit');
-      btn.classList.add('armed');
-      btn.textContent = 'CONFIRM';
-      // Auto-disarm
-      window.clearTimeout(armSubmit._t);
-      armSubmit._t = window.setTimeout(disarmSubmit, 3500);
-    }
+      // Putts behavior:
+      //   default each hole = 0 (no ring)
+      //   1 putt = gold ring
+      //   2 putts = green ring
+      //   3+ putts = red ring
+      // Hold 1s to reset back to 0.
+      let putts = 0;
+      let holdTimer = null;
 
-    // Honors
-    $('btnHonors').addEventListener('click', () => {
-      state.honors = !state.honors;
-      $('btnHonors').classList.toggle('on', state.honors);
-    });
+      function renderPutts() {
+        railPutts.classList.toggle('active', putts > 0);
+        railPutts.classList.remove('putts1','putts2','putts3');
+        if (putts === 1) railPutts.classList.add('putts1');
+        else if (putts === 2) railPutts.classList.add('putts2');
+        else if (putts >= 3) railPutts.classList.add('putts3');
+      }
 
-    // Score stepper — IMPORTANT: no zero shown by default
-    $('btnMinus').addEventListener('click', () => {
-      if (state.submitted) return;
-      if (state.score === null) state.score = 1; // first touch becomes 1 (not 0)
-      else state.score = Math.max(1, state.score - 1);
-      renderScore();
-      disarmSubmit();
-    });
-    $('btnPlus').addEventListener('click', () => {
-      if (state.submitted) return;
-      if (state.score === null) state.score = 1;
-      else state.score = Math.min(30, state.score + 1);
-      renderScore();
-      disarmSubmit();
-    });
+      function cyclePutts() {
+        putts = (putts >= 3) ? 0 : (putts + 1);
+        renderPutts();
+      }
 
-    // Toggles (non-exclusive)
-    $('btnFairway').addEventListener('click', () => { if(state.submitted) return; state.fairway=!state.fairway; setPressed('btnFairway', state.fairway); disarmSubmit();});
-    $('btnSand').addEventListener('click', () => { if(state.submitted) return; state.sand=!state.sand; setPressed('btnSand', state.sand); disarmSubmit();});
-    $('btnGreen').addEventListener('click', () => { if(state.submitted) return; state.green=!state.green; setPressed('btnGreen', state.green); disarmSubmit();});
+      function resetPutts() {
+        putts = 0;
+        renderPutts();
+      }
 
-    // Putts: tap cycles, hold resets
-    let puttsHoldTimer = null;
-    $('btnPutts').addEventListener('pointerdown', () => {
-      if (state.submitted) return;
-      puttsHoldTimer = window.setTimeout(() => {
-        resetPutts();
-        puttsHoldTimer = null;
-        disarmSubmit();
-      }, 900);
-    });
-    $('btnPutts').addEventListener('pointerup', () => {
-      if (state.submitted) return;
-      if (puttsHoldTimer){
-        window.clearTimeout(puttsHoldTimer);
-        puttsHoldTimer = null;
+      railPutts.addEventListener('click', () => {
+        // ignore click if long-press already fired
+        if (railPutts.dataset.longpress === '1') {
+          railPutts.dataset.longpress = '0';
+          return;
+        }
         cyclePutts();
-        disarmSubmit();
-      }
-    });
-    $('btnPutts').addEventListener('pointerleave', () => {
-      if (puttsHoldTimer){
-        window.clearTimeout(puttsHoldTimer);
-        puttsHoldTimer = null;
-      }
-    });
+      });
 
-    // Penalty: increments, long-press to reset
-    let penHold = null;
-    $('btnPenalty').addEventListener('pointerdown', () => {
-      if (state.submitted) return;
-      penHold = window.setTimeout(() => {
-        state.penalty = 0;
-        $('btnPenalty').querySelector('.icon').textContent = '+1';
-        $('btnPenalty').querySelector('.label').textContent = 'Penalty';
-        penHold = null;
-        disarmSubmit();
-      }, 900);
-    });
-    $('btnPenalty').addEventListener('pointerup', () => {
-      if (state.submitted) return;
-      if (penHold){
-        window.clearTimeout(penHold);
-        penHold = null;
-        state.penalty = Math.min(9, state.penalty + 1);
-        $('btnPenalty').querySelector('.icon').textContent = `+${state.penalty}`;
-        $('btnPenalty').querySelector('.label').textContent = (state.penalty === 0) ? 'Penalty' : `Penalty: ${state.penalty}`;
-        disarmSubmit();
-      }
-    });
-
-    // Notes / AI placeholders (Phase 1 stubs)
-    $('btnNotes').addEventListener('click', () => alert('Notes (Phase 1 stub)'));
-    $('btnFairwayAI').addEventListener('click', () => alert('Fairway AI (Phase 1 stub)'));
-    $('btnGreenAI').addEventListener('click', () => alert('Green AI (Phase 1 stub)'));
-
-    // Submit: two-tap confirm. Locks the card locally.
-    $('btnSubmit').addEventListener('click', () => {
-      if (state.submitted) return;
-
-      // Must have a score to submit
-      if (state.score === null){
-        alert('Enter your score first.');
-        return;
-      }
-
-      if (!state.submitArmed){
-        armSubmit();
-        return;
-      }
-
-      // Confirmed
-      disarmSubmit();
-      state.submitted = true;
-      $('btnSubmit').textContent = 'SUBMITTED';
-      $('btnSubmit').classList.remove('armed');
-      $('btnSubmit').style.opacity = '0.7';
-      $('btnSubmit').style.cursor = 'default';
-      renderScore();
-
-      // In Phase 1: store in localStorage as a stand-in for real sync
-      const payload = {
-        hole: Number($('holeNum').textContent || 1),
-        par: Number($('holePar').textContent || 4),
-        score: state.score,
-        honors: state.honors,
-        fairway: state.fairway,
-        sand: state.sand,
-        green: state.green,
-        putts: state.putts,
-        penalty: state.penalty,
-        ts: Date.now(),
-        build: 'PLAYER_V5_FRESH_20260213_01'
+      const startHold = () => {
+        clearTimeout(holdTimer);
+        holdTimer = setTimeout(() => {
+          railPutts.dataset.longpress = '1';
+          resetPutts();
+        }, 900);
       };
-      try{
-        const key = 'ms_player_lastSubmission';
-        localStorage.setItem(key, JSON.stringify(payload));
-      }catch(e){}
-      alert('Score submitted (local stand-in).');
-    });
+      const endHold = () => {
+        clearTimeout(holdTimer);
+      };
 
-    // Bottom nav stubs
-    function setActive(id){
-      ['navHome','navScores','navRules','navMoney'].forEach(x => $(x)?.classList.toggle('active', x===id));
-    }
-    $('navHome').addEventListener('click', () => setActive('navHome'));
-    $('navScores').addEventListener('click', () => setActive('navScores'));
-    $('navRules').addEventListener('click', () => setActive('navRules'));
-    $('navMoney').addEventListener('click', () => setActive('navMoney'));
+      railPutts.addEventListener('mousedown', startHold);
+      railPutts.addEventListener('mouseup', endHold);
+      railPutts.addEventListener('mouseleave', endHold);
 
-    // Initial render
-    renderScore();
-    resetPutts();
-    setPressed('btnFairway', false);
-    setPressed('btnSand', false);
-    setPressed('btnGreen', false);
+      railPutts.addEventListener('touchstart', startHold, {passive:true});
+      railPutts.addEventListener('touchend', endHold);
+      railPutts.addEventListener('touchcancel', endHold);
+
+      keyAsClick(railPutts);
+      renderPutts();
+
+      // Mini buttons (placeholders)
+      const btnPenalty = document.getElementById('btnPenalty');
+      const btnNotes = document.getElementById('btnNotes');
+      const btnFairwayAI = document.getElementById('btnFairwayAI');
+      const btnGreenAI = document.getElementById('btnGreenAI');
+
+      [btnPenalty, btnNotes, btnFairwayAI, btnGreenAI].forEach((el) => {
+        el.addEventListener('click', () => {
+          // Placeholder for later wiring
+          // Keep minimal, no modal spam.
+          el.style.filter = 'brightness(1.12)';
+          setTimeout(() => el.style.filter = '', 140);
+        });
+        keyAsClick(el);
+      });
+
+      // Submit (two-tap confirm style but lightweight)
+      const submit = document.getElementById('btnSubmit');
+      let armed = false;
+      let armTimer = null;
+
+      function disarm() {
+        armed = false;
+        submit.textContent = 'SUBMIT SCORE';
+        submit.style.borderColor = 'rgba(217,180,94,0.26)';
+      }
+
+      submit.addEventListener('click', () => {
+        if (!armed) {
+          armed = true;
+          submit.textContent = 'CONFIRM';
+          submit.style.borderColor = 'rgba(14,110,74,0.55)';
+          clearTimeout(armTimer);
+          armTimer = setTimeout(disarm, 3500);
+          return;
+        }
+        disarm();
+        // TODO: wire to scorekeeper
+        alert('Sent to scorekeeper (wire later).');
+      });
+
+      // Bottom nav: visual active state only
+      const navIds = ['navHome','navScores','navRules','navMoney'];
+      const navBtns = navIds.map(id => document.getElementById(id)).filter(Boolean);
+      navBtns.forEach((b) => {
+        b.addEventListener('click', () => {
+          navBtns.forEach(x => x.classList.toggle('active', x === b));
+        });
+      });
+    })();
   </script>
 
-  <!-- Keep your canonical helper JS if you want nav highlighting on the full site -->
+  <!-- Keep canonical helper JS for nav highlighting etc if you want it site-wide -->
   <script src="/assets/js/main.js"></script>
 </body>
 </html>
