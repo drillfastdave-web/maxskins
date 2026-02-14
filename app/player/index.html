@@ -1,765 +1,591 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <!-- PLAYER_DEPLOY_FINGERPRINT: V7_DEPLOY_TEST_2026_02_13_09XX -->
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0b0b" />
-  <title>MaxSkins — Player Screen</title>
-
-  <!-- MAXSKINS_PLAYER_INDEX_PROD_V6_RAILS | 2026-02-14 03:23
-       Fingerprint: PLAYER::V6_RAILS
-       Notes: Restores 4 vertical rails (Fairway/Sand/Green/Putts). Removes floating logo + game indicator pills.
-  -->
-
-  <link rel="icon" href="/assets/img/MSG_Logo.png" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MaxSkins — Player Screen V1.0 (Static)</title>
   <style>
-    /* ---------------------------
-       MaxSkins Player Screen (PROD V6_RAILS)
-       Goal: deterministic layout, no "ghost" UI
-    ---------------------------- */
-
-    :root {
-      --bg: #0b0b0b;
-      --panel: rgba(255,255,255,0.06);
-      --panel2: rgba(255,255,255,0.08);
-      --stroke: rgba(255,255,255,0.12);
-      --stroke2: rgba(255,255,255,0.18);
-      --gold: #d9b45e;
-      --gold2: #a8843d;
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.60);
-      --shadow: 0 18px 60px rgba(0,0,0,0.55);
-
-      --radius: 22px;
-      --radiusSm: 14px;
-
-      --isoW: 390px;
-      --isoH: 844px;
+    :root{
+      --bg:#0f1214;
+      --panel:#151a1d;
+      --panel2:#101417;
+      --stroke:rgba(255,255,255,.10);
+      --text:#f1ede4;
+      --muted:rgba(241,237,228,.70);
+      --gold:#d7b35a;
+      --green:#56c271;
+      --red:#e05a5a;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:22px;
     }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
+    *{box-sizing:border-box}
+    body{
+      margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      overflow: hidden;
+      background: radial-gradient(1200px 900px at 50% -20%, rgba(215,179,90,.10), rgba(15,18,20,0) 55%),
+                  radial-gradient(900px 600px at 10% 10%, rgba(86,194,113,.07), rgba(15,18,20,0) 55%),
+                  var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+      padding:18px 14px 22px;
     }
-
-    /* Center + scale the deterministic phone canvas */
-    body {
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 16px 10px;
-      box-sizing: border-box;
+    .phone{
+      width:min(420px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
     }
-
-    #msIsoStage {
-      width: var(--isoW);
-      height: var(--isoH);
-      border-radius: 30px;
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
       box-shadow: var(--shadow);
-      background:
-        radial-gradient(120% 60% at 50% 0%, rgba(217,180,94,0.10), rgba(0,0,0,0) 60%),
-        radial-gradient(120% 60% at 50% 110%, rgba(14, 110, 74, 0.12), rgba(0,0,0,0) 60%),
-        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.0));
-      border: 1px solid rgba(255,255,255,0.10);
-      position: relative;
-      transform-origin: top center;
-      transform: scale(var(--msScale, 1));
+      overflow:hidden;
     }
-
-    @media (max-width: 420px) {
-      #msIsoStage {
-        --msScale: calc((100vw - 20px) / 390);
-      }
+    .topbar{
+      padding:14px 14px 12px;
+      display:grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items:center;
+      gap:10px;
+      background: linear-gradient(180deg, rgba(215,179,90,.08), rgba(21,26,29,0));
     }
-
-    @media (max-height: 900px) {
-      #msIsoStage {
-        --msScale: min(var(--msScale, 1), calc((100vh - 28px) / 844));
-      }
+    .holebox{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      padding:10px 12px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.08);
+      justify-self:start;
+      max-width: 160px;
     }
-
-    /* Safe-area padding wrapper */
-    .screen {
-      position: absolute;
-      inset: 0;
-      padding: 14px 14px calc(14px + env(safe-area-inset-bottom)) 14px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .holebox .hole{
+      font-size:20px;
+      font-weight:800;
+      letter-spacing:.3px;
     }
-
-    /* Top brand bar */
-    .topBar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.10);
+    .holebox .meta{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.1;
     }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .brand img {
-      height: 38px;        /* SHRUNK to fit properly */
-      width: auto;
-      display: block;
-      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.55));
-    }
-
-    .brandText {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.05;
-      min-width: 0;
-    }
-
-    .brandText .title {
-      font-weight: 800;
-      letter-spacing: 0.8px;
-      color: rgba(255,255,255,0.92);
-      font-size: 12px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .brandText .sub {
-      font-size: 11px;
-      color: rgba(255,255,255,0.62);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .pillTag {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 7px 10px;
+    .playername{
+      text-align:center;
+      font-weight:800;
+      letter-spacing:.25px;
+      font-size:16px;
+      opacity:.95;
+      padding:6px 10px;
       border-radius: 999px;
-      background: rgba(14,110,74,0.20);
-      border: 1px solid rgba(14,110,74,0.40);
-      color: rgba(255,255,255,0.92);
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      font-size: 11px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
     }
-
-    /* Hole header */
-    .holeRow {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .holeBadge {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
+    .yardbox{
+      justify-self:end;
+      padding:10px 12px;
       border-radius: 16px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.10);
-      font-weight: 800;
-      letter-spacing: 0.8px;
-      font-size: 12px;
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.08);
+      text-align:right;
+      max-width: 160px;
+    }
+    .yardbox .yards{
+      font-size:18px;
+      font-weight:800;
+      color: var(--gold);
+      letter-spacing:.2px;
+    }
+    .yardbox .label{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
     }
 
-    .miniInfo {
-      font-size: 11px;
-      color: rgba(255,255,255,0.55);
-      padding: 10px 12px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.10);
+    .scorecore{
+      padding:16px 14px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
     }
-
-    /* Honors bar */
-    .honors {
-      padding: 10px 12px;
-      border-radius: 16px;
-      text-align: center;
-      font-weight: 900;
-      letter-spacing: 1.2px;
-      font-size: 12px;
-      color: rgba(255,255,255,0.90);
-      background: linear-gradient(180deg, rgba(217,180,94,0.12), rgba(255,255,255,0.02));
-      border: 1px solid rgba(217,180,94,0.22);
+    .scoreRingWrap{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding-top:4px;
     }
-
-    /* Player row */
-    .playerRow {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: center;
-      padding: 12px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.10);
-    }
-
-    .playerName {
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing: 0.3px;
-      line-height: 1.05;
-    }
-
-    .scoreStepper {
-      display: inline-grid;
-      grid-template-columns: 42px 44px 42px;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .stepBtn, .scoreBox {
-      height: 44px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.03);
-      color: rgba(255,255,255,0.92);
-      font-weight: 900;
-      font-size: 18px;
-    }
-
-    .stepBtn {
-      cursor: pointer;
-    }
-
-    .stepBtn:active {
-      transform: translateY(1px);
-    }
-
-    .scoreBox {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* 4-rail area */
-    .rails {
-      flex: 1;
-      min-height: 360px;
-      padding: 12px;
-      border-radius: 22px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.10);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .railsGrid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      align-items: end;
-    }
-
-    .rail {
-      height: 240px;
-      border-radius: 18px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.0));
-      border: 1px solid rgba(255,255,255,0.10);
-      position: relative;
-      overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.35);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 10px;
-      box-sizing: border-box;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .rail::before {
-      content: "";
-      position: absolute;
-      inset: 0;
+    .scoreRing{
+      width: 210px;
+      aspect-ratio: 1/1;
+      border-radius: 999px;
+      display:grid;
+      place-items:center;
       background:
-        radial-gradient(70% 50% at 50% 0%, rgba(217,180,94,0.10), rgba(0,0,0,0) 62%),
-        radial-gradient(70% 50% at 50% 110%, rgba(14,110,74,0.10), rgba(0,0,0,0) 62%);
-      opacity: 0.9;
-      pointer-events: none;
+        radial-gradient(circle at 50% 50%, rgba(0,0,0,.55), rgba(0,0,0,.25) 60%, rgba(0,0,0,0) 70%),
+        conic-gradient(from 160deg, rgba(215,179,90,.75), rgba(86,194,113,.65), rgba(215,179,90,.75));
+      padding:2px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.45);
     }
-
-    .railInner {
-      position: relative;
+    .scoreRingInner{
+      width: 100%;
       height: 100%;
-      width: 100%;
-      border-radius: 14px;
-      background: rgba(0,0,0,0.18);
-      border: 1px solid rgba(255,255,255,0.08);
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .railIcon {
-      width: 46px;
-      height: 46px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.04);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      letter-spacing: 0.8px;
-      font-size: 16px;
-      position: relative;
-    }
-
-    .railLabel {
-      margin-top: 10px;
-      text-align: center;
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 0.6px;
-      color: rgba(255,255,255,0.88);
-    }
-
-    /* Active rings */
-    .rail.active {
-      border-color: rgba(217,180,94,0.30);
-      box-shadow:
-        inset 0 0 0 1px rgba(217,180,94,0.12),
-        0 10px 26px rgba(0,0,0,0.55);
-    }
-
-    .rail.active .railIcon {
-      border-color: rgba(217,180,94,0.40);
-      box-shadow: 0 0 0 2px rgba(217,180,94,0.16);
-    }
-
-    /* Putts status colors */
-    .putts1 .railIcon { box-shadow: 0 0 0 2px rgba(217,180,94,0.22); }
-    .putts2 .railIcon { box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.22); }
-    .putts3 .railIcon { box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.24); }
-
-    /* Second row: small actions */
-    .actionsRow {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      align-items: center;
-    }
-
-    .miniBtn {
-      height: 74px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.10);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .miniBtn .miniIcon {
-      width: 36px;
-      height: 36px;
-      border-radius: 14px;
-      background: rgba(0,0,0,0.18);
-      border: 1px solid rgba(255,255,255,0.10);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 14px;
-    }
-
-    .miniBtn .miniLabel {
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: 0.6px;
-      color: rgba(255,255,255,0.85);
-      text-align: center;
-      line-height: 1.05;
-    }
-
-    .miniBtn:active {
-      transform: translateY(1px);
-    }
-
-    /* Submit */
-    .submitWrap {
-      padding-top: 2px;
-    }
-
-    .submitBtn {
-      width: 100%;
-      height: 54px;
       border-radius: 999px;
-      border: 1px solid rgba(217,180,94,0.26);
-      background: linear-gradient(180deg, rgba(217,180,94,0.14), rgba(255,255,255,0.03));
-      color: rgba(255,255,255,0.92);
-      font-weight: 950;
-      letter-spacing: 1px;
-      cursor: pointer;
+      background: linear-gradient(180deg, rgba(21,26,29,.95), rgba(16,20,23,.95));
+      border:1px solid rgba(255,255,255,.10);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      position:relative;
+      overflow:hidden;
+    }
+    .scoreRingInner:before{
+      content:"";
+      position:absolute;
+      inset:-40px -60px auto -60px;
+      height:120px;
+      background: radial-gradient(closest-side, rgba(215,179,90,.14), rgba(0,0,0,0));
+      transform: rotate(-10deg);
+      pointer-events:none;
+    }
+    .scoreLabel{
+      font-size:12px;
+      color: var(--muted);
+      letter-spacing:.4px;
+      text-transform: uppercase;
+    }
+    .scoreNumber{
+      font-size:64px;
+      font-weight:900;
+      line-height:1;
+      letter-spacing:.5px;
+    }
+    .scoreHint{
+      font-size:12px;
+      color: rgba(241,237,228,.62);
+      margin-top:2px;
+      text-align:center;
+      padding:0 14px;
     }
 
-    .submitBtn:active {
-      transform: translateY(1px);
+    .scoreControls{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:10px;
+      align-items:center;
     }
-
-    .helper {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      font-size: 10px;
-      color: rgba(255,255,255,0.56);
-      padding: 2px 4px 0 4px;
-    }
-
-    /* Bottom nav */
-    .bottomNav {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      padding: 10px 10px 8px 10px;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.10);
-    }
-
-    .navBtn {
-      height: 52px;
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      background: rgba(0,0,0,.28);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.10);
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      color: rgba(255,255,255,0.88);
-      font-weight: 900;
-      letter-spacing: 0.6px;
-      font-size: 11px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
+      padding:12px 12px;
+      font-weight:800;
+      letter-spacing:.2px;
+      transition: transform .06s ease, background .18s ease, border-color .18s ease, filter .18s ease;
+      min-height:48px;
+    }
+    .btn:active{ transform: translateY(1px) scale(.99); }
+    .btn.ghost{
+      background: rgba(0,0,0,.18);
+    }
+    .btn.primary{
+      background: rgba(215,179,90,.12);
+      border-color: rgba(215,179,90,.28);
+    }
+    .btn.small{
+      font-size:13px;
+      min-height:44px;
+      padding:10px 10px;
+      border-radius: 14px;
+    }
+    .btn.wide{ width:100%; }
+
+    .pills{
+      padding:14px;
+    }
+    .pillStack{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .pill{
+      width:100%;
+      min-height:58px;
+      border-radius: 999px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 16px;
+      border:1px solid rgba(255,255,255,.11);
+      background: linear-gradient(180deg, rgba(0,0,0,.26), rgba(0,0,0,.18));
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .06s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+      box-shadow: 0 10px 22px rgba(0,0,0,.26);
+    }
+    .pill:active{ transform: translateY(1px) scale(.995); }
+    .pill .left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:900;
+      letter-spacing:.2px;
+      font-size:16px;
+    }
+    .icon{
+      width:34px;
+      height:34px;
+      display:grid;
+      place-items:center;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      font-size:16px;
+    }
+    .pill .right{
+      font-size:13px;
+      color: var(--muted);
+      font-weight:800;
     }
 
-    .navBtn.active {
-      border-color: rgba(14,110,74,0.42);
-      background: rgba(14,110,74,0.16);
-      box-shadow: 0 0 0 2px rgba(14,110,74,0.10);
+    .pill.on{
+      border-color: rgba(86,194,113,.38);
+      background: linear-gradient(180deg, rgba(86,194,113,.14), rgba(0,0,0,.16));
+      box-shadow: 0 12px 28px rgba(0,0,0,.28);
+    }
+    .pill.on .right{ color: rgba(86,194,113,.95); }
+
+    /* Putts special */
+    .pill.putts .icon{ font-size:18px; }
+    .pill.putts.white{
+      border-color: rgba(255,255,255,.12);
+    }
+    .pill.putts.gold{
+      border-color: rgba(215,179,90,.45);
+      background: linear-gradient(180deg, rgba(215,179,90,.16), rgba(0,0,0,.16));
+    }
+    .pill.putts.green{
+      border-color: rgba(86,194,113,.45);
+      background: linear-gradient(180deg, rgba(86,194,113,.16), rgba(0,0,0,.16));
+    }
+    .pill.putts.red{
+      border-color: rgba(224,90,90,.45);
+      background: linear-gradient(180deg, rgba(224,90,90,.16), rgba(0,0,0,.16));
+    }
+    .pill.putts .right strong{
+      color: var(--text);
+      font-weight:1000;
     }
 
-    .navIcon {
-      font-size: 14px;
-      line-height: 1;
+    .footer{
+      padding:12px 14px;
+      display:flex;
+      gap:10px;
+      justify-content:space-between;
+      background: rgba(0,0,0,.16);
+      border-top:1px solid rgba(255,255,255,.08);
+    }
+    .footer .btn{
+      flex:1;
+      border-radius: 999px;
+      min-height:52px;
+      font-size:14px;
     }
 
-    /* Tiny dev label (non-intrusive) */
-    .devTag {
-      position: absolute;
-      right: 12px;
-      top: 12px;
-      font-size: 10px;
-      color: rgba(255,255,255,0.35);
-      letter-spacing: 0.6px;
-      pointer-events: none;
+    .note{
+      padding:10px 14px 0;
+      font-size:12px;
+      color: rgba(241,237,228,.58);
+      line-height:1.35;
+    }
+
+    /* Small screens */
+    @media (max-width: 360px){
+      .scoreRing{ width: 196px; }
+      .scoreNumber{ font-size:58px; }
+      .pill{ min-height:56px; }
     }
   </style>
 </head>
-
 <body>
-  <div id="msIsoStage" data-ms-player="1">
-    <div class="devTag">PLAYER::V6_RAILS</div>
-<div id="deployStamp" style="position:fixed;z-index:999999;bottom:8px;right:10px;
-background:#000;color:#ff3b3b;padding:6px 10px;border:2px solid #ff3b3b;
-font:12px/1.2 Arial;border-radius:10px;opacity:0.9;">
-V7_DEPLOY_TEST
-</div>
-    <div class="screen" id="playerScreen">
-      <div class="topBar">
-        <div class="brand" aria-label="MaxSkins brand">
-          <img src="/assets/img/MSG_Logo.png" alt="MSG MaxSkins Golf" />
-          <div class="brandText">
-            <div class="title">MSG</div>
-            <div class="sub">MaxSkins Golf — Player</div>
+  <main class="phone" role="application" aria-label="MaxSkins Player Screen">
+    <section class="card">
+      <div class="topbar">
+        <div class="holebox" aria-label="Hole info">
+          <div class="hole" id="holeText">Hole 1</div>
+          <div class="meta">
+            <div>Par <span id="parText">4</span></div>
+            <div class="muted">Player</div>
           </div>
         </div>
-        <div class="pillTag" aria-label="mode">PLAYER</div>
-      </div>
 
-      <div class="holeRow">
-        <div class="holeBadge" aria-label="hole info">
-          <span id="holeLabel">HOLE 6</span>
-          <span id="parLabel">PAR 4</span>
-        </div>
-        <div class="miniInfo" aria-label="status">Round: 1/18</div>
-      </div>
+        <div class="playername" id="playerName" title="Tap to rename">Dave</div>
 
-      <div class="honors" id="honorsBar">HONORS</div>
-
-      <div class="playerRow" aria-label="player row">
-        <div class="playerName" id="playerName">John Smith</div>
-
-        <div class="scoreStepper" aria-label="score stepper">
-          <button class="stepBtn" id="scoreMinus" type="button" aria-label="minus">−</button>
-          <div class="scoreBox" id="scoreValue" aria-label="score">4</div>
-          <button class="stepBtn" id="scorePlus" type="button" aria-label="plus">+</button>
+        <div class="yardbox" aria-label="Yardage">
+          <div class="yards"><span id="yardsText">372</span> yd</div>
+          <div class="label">To pin</div>
         </div>
       </div>
 
-      <div class="rails" aria-label="player stats">
-        <div class="railsGrid">
-          <div class="rail" id="railFairway" role="button" tabindex="0" aria-label="Fairway">
-            <div class="railInner">
-              <div class="railIcon">⛳</div>
+      <div class="scorecore">
+        <div class="scoreRingWrap">
+          <div class="scoreRing" aria-label="Stroke counter">
+            <div class="scoreRingInner">
+              <div class="scoreLabel">Strokes (preview)</div>
+              <div class="scoreNumber" id="strokeText">4</div>
+              <div class="scoreHint">Official screen confirms the final score. This is your quick entry.</div>
             </div>
-            <div class="railLabel">Fairway</div>
-          </div>
-
-          <div class="rail" id="railSand" role="button" tabindex="0" aria-label="Sand">
-            <div class="railInner">
-              <div class="railIcon">▦</div>
-            </div>
-            <div class="railLabel">Sand</div>
-          </div>
-
-          <div class="rail" id="railGreen" role="button" tabindex="0" aria-label="Green">
-            <div class="railInner">
-              <div class="railIcon">●</div>
-            </div>
-            <div class="railLabel">Green</div>
-          </div>
-
-          <div class="rail" id="railPutts" role="button" tabindex="0" aria-label="Putts">
-            <div class="railInner">
-              <div class="railIcon">🏁</div>
-            </div>
-            <div class="railLabel">Putts</div>
           </div>
         </div>
 
-        <div class="actionsRow" aria-label="actions">
-          <div class="miniBtn" id="btnPenalty" role="button" tabindex="0" aria-label="Penalty">
-            <div class="miniIcon">+1</div>
-            <div class="miniLabel">Penalty</div>
-          </div>
-
-          <div class="miniBtn" id="btnNotes" role="button" tabindex="0" aria-label="Notes">
-            <div class="miniIcon">🎙</div>
-            <div class="miniLabel">Notes</div>
-          </div>
-
-          <div class="miniBtn" id="btnFairwayAI" role="button" tabindex="0" aria-label="Fairway AI">
-            <div class="miniIcon">🎯</div>
-            <div class="miniLabel">Fairway<br/>AI</div>
-          </div>
-
-          <div class="miniBtn" id="btnGreenAI" role="button" tabindex="0" aria-label="Green AI">
-            <div class="miniIcon">▣</div>
-            <div class="miniLabel">Green<br/>AI</div>
-          </div>
+        <div class="scoreControls" aria-label="Stroke controls">
+          <button class="btn ghost wide" id="minusBtn" aria-label="Decrease strokes">−</button>
+          <button class="btn primary wide" id="resetBtn" aria-label="Reset strokes">Reset</button>
+          <button class="btn ghost wide" id="plusBtn" aria-label="Increase strokes">+</button>
         </div>
 
-        <div class="submitWrap">
-          <button class="submitBtn" id="btnSubmit" type="button">SUBMIT SCORE</button>
-          <div class="helper">
-            <div>Tap Fairway / Sand / Green to toggle.</div>
-            <div>Putts cycles 0→1→2→3+ (hold 1s = reset).</div>
-          </div>
+        <div class="note">
+          Tip: Tap your name to change it. Each hole saves its own stats automatically.
+        </div>
+      </div>
+    </section>
+
+    <section class="card pills" aria-label="Stat pills">
+      <div class="pillStack">
+        <div class="pill" id="pillFairway" role="button" tabindex="0" aria-pressed="false">
+          <div class="left"><span class="icon">⛳</span>Fairway</div>
+          <div class="right">Toggle</div>
+        </div>
+
+        <div class="pill" id="pillGreen" role="button" tabindex="0" aria-pressed="false">
+          <div class="left"><span class="icon">🟢</span>Green</div>
+          <div class="right">Toggle</div>
+        </div>
+
+        <div class="pill" id="pillSand" role="button" tabindex="0" aria-pressed="false">
+          <div class="left"><span class="icon">🏖️</span>Sand</div>
+          <div class="right">Toggle</div>
+        </div>
+
+        <div class="pill putts white" id="pillPutts" role="button" tabindex="0" aria-pressed="false" aria-label="Putts flag cycle">
+          <div class="left"><span class="icon">🏁</span>Putts</div>
+          <div class="right"><strong id="puttsValue">—</strong> <span id="puttsHint">White</span></div>
         </div>
       </div>
 
-      <div class="bottomNav" aria-label="bottom navigation">
-        <button class="navBtn active" id="navHome" type="button"><div class="navIcon">🏠</div>HOME</button>
-        <button class="navBtn" id="navScores" type="button"><div class="navIcon">📊</div>SCORES</button>
-        <button class="navBtn" id="navRules" type="button"><div class="navIcon">📜</div>RULES</button>
-        <button class="navBtn" id="navMoney" type="button"><div class="navIcon">💰</div>MONEY</button>
+      <div class="footer" aria-label="Hole navigation">
+        <button class="btn small" id="prevHoleBtn" aria-label="Previous hole">← Prev Hole</button>
+        <button class="btn small" id="nextHoleBtn" aria-label="Next hole">Next Hole →</button>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
   <script>
-    // -----------------------------
-    // MaxSkins Player Screen (PROD V6_RAILS)
-    // Fingerprint: PLAYER::V6_RAILS
-    // -----------------------------
+    // ---------- State ----------
+    const DEFAULT_HOLES = [
+      // Simple placeholders; replace with real course data later.
+      { par: 4, yards: 372 },
+      { par: 5, yards: 498 },
+      { par: 3, yards: 164 },
+      { par: 4, yards: 410 },
+      { par: 4, yards: 356 },
+      { par: 5, yards: 521 },
+      { par: 3, yards: 178 },
+      { par: 4, yards: 402 },
+      { par: 4, yards: 389 },
+      { par: 4, yards: 401 },
+      { par: 5, yards: 512 },
+      { par: 3, yards: 172 },
+      { par: 4, yards: 433 },
+      { par: 4, yards: 366 },
+      { par: 5, yards: 545 },
+      { par: 3, yards: 186 },
+      { par: 4, yards: 418 },
+      { par: 4, yards: 392 },
+    ];
 
-    // Score stepper (visual only for now)
-    (function() {
-      const scoreEl = document.getElementById('scoreValue');
-      const minus = document.getElementById('scoreMinus');
-      const plus  = document.getElementById('scorePlus');
+    const STORAGE_KEY = "maxskins_player_screen_v1_0";
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 
-      function getScore() {
-        const n = parseInt(scoreEl.textContent || '0', 10);
-        return Number.isFinite(n) ? n : 0;
+    function loadAppState(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return null;
+        return JSON.parse(raw);
+      }catch(e){
+        return null;
       }
-      function setScore(n) {
-        scoreEl.textContent = String(Math.max(0, n));
-      }
+    }
 
-      minus.addEventListener('click', () => setScore(getScore() - 1));
-      plus.addEventListener('click', () => setScore(getScore() + 1));
-    })();
+    function saveAppState(state){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
 
-    // Rail toggles
-    (function() {
-      const railFairway = document.getElementById('railFairway');
-      const railSand    = document.getElementById('railSand');
-      const railGreen   = document.getElementById('railGreen');
-      const railPutts   = document.getElementById('railPutts');
+    function makeFreshState(){
+      return {
+        version: "1.0",
+        playerName: "Dave",
+        currentHole: 1,
+        holes: DEFAULT_HOLES,
+        perHole: Array.from({length: 18}, () => ({
+          strokes: 4,
+          fairway: false,
+          green: false,
+          sand: false,
+          puttsStage: 0, // 0 white, 1 gold, 2 green, 3 red (3+)
+        }))
+      };
+    }
 
-      // Non-exclusive: Fairway/Sand/Green can all be active simultaneously
-      function toggleActive(el) {
-        el.classList.toggle('active');
-      }
+    let state = loadAppState() || makeFreshState();
 
-      function keyAsClick(el) {
-        el.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            el.click();
-          }
-        });
-      }
+    // ---------- DOM ----------
+    const holeText = document.getElementById("holeText");
+    const parText = document.getElementById("parText");
+    const yardsText = document.getElementById("yardsText");
+    const playerNameEl = document.getElementById("playerName");
+    const strokeText = document.getElementById("strokeText");
 
-      railFairway.addEventListener('click', () => toggleActive(railFairway));
-      railSand.addEventListener('click', () => toggleActive(railSand));
-      railGreen.addEventListener('click', () => toggleActive(railGreen));
-      keyAsClick(railFairway); keyAsClick(railSand); keyAsClick(railGreen);
+    const pillFairway = document.getElementById("pillFairway");
+    const pillGreen = document.getElementById("pillGreen");
+    const pillSand = document.getElementById("pillSand");
+    const pillPutts = document.getElementById("pillPutts");
+    const puttsValue = document.getElementById("puttsValue");
+    const puttsHint = document.getElementById("puttsHint");
 
-      // Putts behavior:
-      //   default each hole = 0 (no ring)
-      //   1 putt = gold ring
-      //   2 putts = green ring
-      //   3+ putts = red ring
-      // Hold 1s to reset back to 0.
-      let putts = 0;
-      let holdTimer = null;
+    const minusBtn = document.getElementById("minusBtn");
+    const plusBtn = document.getElementById("plusBtn");
+    const resetBtn = document.getElementById("resetBtn");
 
-      function renderPutts() {
-        railPutts.classList.toggle('active', putts > 0);
-        railPutts.classList.remove('putts1','putts2','putts3');
-        if (putts === 1) railPutts.classList.add('putts1');
-        else if (putts === 2) railPutts.classList.add('putts2');
-        else if (putts >= 3) railPutts.classList.add('putts3');
-      }
+    const prevHoleBtn = document.getElementById("prevHoleBtn");
+    const nextHoleBtn = document.getElementById("nextHoleBtn");
 
-      function cyclePutts() {
-        putts = (putts >= 3) ? 0 : (putts + 1);
-        renderPutts();
-      }
+    // ---------- Render ----------
+    function puttsLabel(stage){
+      // stage: 0 white, 1 gold, 2 green, 3 red (3+)
+      if(stage === 0) return { value:"—", hint:"White", cls:"white" };
+      if(stage === 1) return { value:"1", hint:"Gold", cls:"gold" };
+      if(stage === 2) return { value:"2", hint:"Green", cls:"green" };
+      return { value:"3+", hint:"Red", cls:"red" };
+    }
 
-      function resetPutts() {
-        putts = 0;
-        renderPutts();
-      }
+    function setPillOn(el, on){
+      el.classList.toggle("on", !!on);
+      el.setAttribute("aria-pressed", on ? "true" : "false");
+    }
 
-      railPutts.addEventListener('click', () => {
-        // ignore click if long-press already fired
-        if (railPutts.dataset.longpress === '1') {
-          railPutts.dataset.longpress = '0';
-          return;
+    function render(){
+      const idx = clamp(state.currentHole, 1, 18) - 1;
+      const hole = state.holes[idx] || { par: 4, yards: 0 };
+      const h = state.perHole[idx];
+
+      holeText.textContent = `Hole ${idx+1}`;
+      parText.textContent = hole.par;
+      yardsText.textContent = hole.yards;
+
+      playerNameEl.textContent = state.playerName;
+
+      strokeText.textContent = h.strokes;
+
+      setPillOn(pillFairway, h.fairway);
+      setPillOn(pillGreen, h.green);
+      setPillOn(pillSand, h.sand);
+
+      // Putts visual
+      const p = puttsLabel(h.puttsStage);
+      pillPutts.classList.remove("white","gold","green","red");
+      pillPutts.classList.add("putts", p.cls);
+      puttsValue.textContent = p.value;
+      puttsHint.textContent = p.hint;
+
+      // Save every render
+      saveAppState(state);
+    }
+
+    // ---------- Interactions ----------
+    function withCurrentHole(fn){
+      const idx = clamp(state.currentHole, 1, 18) - 1;
+      fn(state.perHole[idx], idx);
+      render();
+    }
+
+    function hookTogglePill(pillEl, key){
+      const toggle = () => withCurrentHole((h) => { h[key] = !h[key]; });
+      pillEl.addEventListener("click", toggle);
+      pillEl.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          toggle();
         }
+      });
+    }
+
+    hookTogglePill(pillFairway, "fairway");
+    hookTogglePill(pillGreen, "green");
+    hookTogglePill(pillSand, "sand");
+
+    // Putts cycle: White -> Gold(1) -> Green(2) -> Red(3+) -> White
+    const cyclePutts = () => withCurrentHole((h) => {
+      h.puttsStage = (h.puttsStage + 1) % 4;
+    });
+    pillPutts.addEventListener("click", cyclePutts);
+    pillPutts.addEventListener("keydown", (e) => {
+      if(e.key === "Enter" || e.key === " "){
+        e.preventDefault();
         cyclePutts();
-      });
-
-      const startHold = () => {
-        clearTimeout(holdTimer);
-        holdTimer = setTimeout(() => {
-          railPutts.dataset.longpress = '1';
-          resetPutts();
-        }, 900);
-      };
-      const endHold = () => {
-        clearTimeout(holdTimer);
-      };
-
-      railPutts.addEventListener('mousedown', startHold);
-      railPutts.addEventListener('mouseup', endHold);
-      railPutts.addEventListener('mouseleave', endHold);
-
-      railPutts.addEventListener('touchstart', startHold, {passive:true});
-      railPutts.addEventListener('touchend', endHold);
-      railPutts.addEventListener('touchcancel', endHold);
-
-      keyAsClick(railPutts);
-      renderPutts();
-
-      // Mini buttons (placeholders)
-      const btnPenalty = document.getElementById('btnPenalty');
-      const btnNotes = document.getElementById('btnNotes');
-      const btnFairwayAI = document.getElementById('btnFairwayAI');
-      const btnGreenAI = document.getElementById('btnGreenAI');
-
-      [btnPenalty, btnNotes, btnFairwayAI, btnGreenAI].forEach((el) => {
-        el.addEventListener('click', () => {
-          // Placeholder for later wiring
-          // Keep minimal, no modal spam.
-          el.style.filter = 'brightness(1.12)';
-          setTimeout(() => el.style.filter = '', 140);
-        });
-        keyAsClick(el);
-      });
-
-      // Submit (two-tap confirm style but lightweight)
-      const submit = document.getElementById('btnSubmit');
-      let armed = false;
-      let armTimer = null;
-
-      function disarm() {
-        armed = false;
-        submit.textContent = 'SUBMIT SCORE';
-        submit.style.borderColor = 'rgba(217,180,94,0.26)';
       }
+    });
 
-      submit.addEventListener('click', () => {
-        if (!armed) {
-          armed = true;
-          submit.textContent = 'CONFIRM';
-          submit.style.borderColor = 'rgba(14,110,74,0.55)';
-          clearTimeout(armTimer);
-          armTimer = setTimeout(disarm, 3500);
-          return;
-        }
-        disarm();
-        // TODO: wire to scorekeeper
-        alert('Sent to scorekeeper (wire later).');
-      });
+    // Strokes +/-, reset
+    minusBtn.addEventListener("click", () => withCurrentHole((h) => {
+      h.strokes = clamp(h.strokes - 1, 1, 20);
+    }));
+    plusBtn.addEventListener("click", () => withCurrentHole((h) => {
+      h.strokes = clamp(h.strokes + 1, 1, 20);
+    }));
+    resetBtn.addEventListener("click", () => withCurrentHole((h, idx) => {
+      // Reset only strokes; leave toggles as-is (player may want them kept).
+      // If you want full reset later, add a long-press or separate button.
+      const par = (state.holes[idx] && state.holes[idx].par) ? state.holes[idx].par : 4;
+      h.strokes = par;
+    }));
 
-      // Bottom nav: visual active state only
-      const navIds = ['navHome','navScores','navRules','navMoney'];
-      const navBtns = navIds.map(id => document.getElementById(id)).filter(Boolean);
-      navBtns.forEach((b) => {
-        b.addEventListener('click', () => {
-          navBtns.forEach(x => x.classList.toggle('active', x === b));
-        });
-      });
-    })();
+    // Hole navigation (auto-saves via render)
+    prevHoleBtn.addEventListener("click", () => {
+      state.currentHole = clamp(state.currentHole - 1, 1, 18);
+      // Putts reset rule per hole is naturally enforced because each hole stores its own puttsStage,
+      // and new holes default to 0 (white) in fresh state.
+      render();
+    });
+
+    nextHoleBtn.addEventListener("click", () => {
+      state.currentHole = clamp(state.currentHole + 1, 1, 18);
+      render();
+    });
+
+    // Tap name to rename
+    playerNameEl.addEventListener("click", () => {
+      const name = prompt("Player name:", state.playerName);
+      if(name && name.trim().length){
+        state.playerName = name.trim().slice(0, 20);
+        render();
+      }
+    });
+
+    // First render
+    render();
   </script>
-
-  <!-- Keep canonical helper JS for nav highlighting etc if you want it site-wide -->
-  <script src="/assets/js/main.js"></script>
 </body>
 </html>
