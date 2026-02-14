@@ -1,15 +1,57 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="color-scheme" content="dark" />
-  <title>MaxSkins — Player Screen</title>
-  <meta name="description" content="MaxSkins Phase 1 — Player Screen (production build)."/>
-  <link rel="icon" href="/assets/img/MSG_LOGO.png" />
-  <style>
 
-    #msPlayer{
+  <style id="ms-iso-reset">
+    /* ===== MaxSkins Player Screen Isolation Reset (V3) =====
+       Purpose: prevent global site CSS from shrinking/offsetting the V4 phone UI.
+       We use high-specificity + !important resets on html/body and a fixed stage wrapper.
+    */
+    html, body{
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      background: #0b0b0b !important;
+      overflow: hidden !important;
+      transform: none !important;
+      zoom: 1 !important;
+    }
+    body{
+      display: flex !important;
+      justify-content: center !important;
+      align-items: flex-start !important;
+    }
+    /* Stage: lock the UI to a 390x844 phone canvas and scale ONLY if viewport is smaller */
+    #msIsoStage{
+      width: 390px !important;
+      height: 844px !important;
+      padding: 14px !important;
+      box-sizing: border-box !important;
+      transform-origin: top center !important;
+      --msScale: 1;
+      transform: scale(var(--msScale)) !important;
+    }
+    @media (max-width: 390px){
+      #msIsoStage{ --msScale: calc(100vw / 390); }
+    }
+    @media (max-height: 844px){
+      #msIsoStage{ --msScale: min(var(--msScale), calc(100vh / 844)); }
+    }
+    /* Defend against global font/line-height or box-sizing changes */
+    #msIsoStage, #msIsoStage *{
+      box-sizing: border-box !important;
+      letter-spacing: normal;
+    }
+  </style>
+
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="dark" name="color-scheme"/>
+<title>MaxSkins — Player Screen</title>
+<style>
+    :root{
       --bg0:#060608;
       --bg1:#0a0a0f;
       --panel: rgba(255,255,255,.06);
@@ -32,8 +74,9 @@
       --pillGap: 9px;
       --edgePad: 0px;
     }
-#msPlayer *{ box-sizing:border-box; }
-    #msPlayer{
+
+    *{ box-sizing:border-box; }
+    body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       background:
@@ -44,7 +87,8 @@
       justify-content:center;
       padding:14px 14px calc(18px + env(safe-area-inset-bottom));
     }
- #msPlayer \.phone{
+
+    .phone{
       width:min(430px, 100%);
       border-radius:28px;
       overflow:hidden;
@@ -54,12 +98,13 @@
     }
 
     /* ---------- TOP HALF PLACEHOLDERS (to be styled with real art later) ---------- */
- #msPlayer \.top{
+    .top{
       padding: 12px 16px 8px;
       border-bottom:1px solid rgba(255,255,255,.06);
       background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.05));
     }
- #msPlayer \.hero{
+
+    .hero{
       height: 78px;
       border-radius: 18px;
       border:1px solid rgba(255,255,255,.10);
@@ -76,14 +121,16 @@
       text-transform:uppercase;
       user-select:none;
     }
- #msPlayer \.metaRow{
+
+    .metaRow{
       margin-top: 8px;
       display:grid;
       grid-template-columns: 1fr auto;
       gap: 10px;
       align-items:center;
     }
- #msPlayer \.holePill{
+
+    .holePill{
       border-radius: 14px;
       padding: 9px 12px;
       border:1px solid rgba(255,255,255,.12);
@@ -94,7 +141,8 @@
       justify-content:space-between;
       gap: 10px;
     }
- #msPlayer \.honors{
+
+    .honors{
       border-radius: 14px;
       padding: 9px 12px;
       border:1px solid rgba(255,255,255,.12);
@@ -107,14 +155,16 @@
       text-align:center;
       min-width: 120px;
     }
- #msPlayer \.playerRow{
+
+    .playerRow{
       margin-top: 8px;
       display:grid;
       grid-template-columns: 1fr auto;
       gap: 10px;
       align-items:center;
     }
- #msPlayer \.playerName{
+
+    .playerName{
       border-radius: 14px;
       padding: 12px 12px;
       border:1px solid rgba(255,255,255,.12);
@@ -126,14 +176,16 @@
       gap: 10px;
       min-height: 44px;
     }
- #msPlayer \.playerName small{
+
+    .playerName small{
       opacity:.75;
       font-weight:700;
       letter-spacing:.12em;
       text-transform:uppercase;
       font-size: 11px;
     }
- #msPlayer \.scoreMini{
+
+    .scoreMini{
       border-radius: 14px;
       padding: 10px;
       border:1px solid rgba(255,255,255,.12);
@@ -144,7 +196,8 @@
       gap: 10px;
       user-select:none;
     }
- #msPlayer \.miniBtn{
+
+    .miniBtn{
       width: 40px;
       height: 40px;
       border-radius: 12px;
@@ -156,8 +209,9 @@
       cursor:pointer;
       -webkit-tap-highlight-color: transparent;
     }
- #msPlayer \.miniBtn:active{ transform: translateY(1px); }
- #msPlayer \.miniScore{
+    .miniBtn:active{ transform: translateY(1px); }
+
+    .miniScore{
       width: 44px;
       text-align:center;
       font-weight:900;
@@ -165,18 +219,20 @@
     }
 
     /* ---------- BOTTOM HALF: 2x4 VERTICAL PILL GRID (this is the important part) ---------- */
- #msPlayer \.bottom{
+    .bottom{
       padding: 14px 14px 18px;
       background: radial-gradient(900px 650px at 50% 120%, rgba(69,211,123,.05), transparent 55%);
     }
- #msPlayer \.pillGrid{
+
+    .pillGrid{
       display:grid;
       grid-template-columns: repeat(4, 1fr);
       gap: var(--pillGap);
       padding: 2px 0 0;
       align-items:stretch;
     }
- #msPlayer \.pill{
+
+    .pill{
       position:relative;
       height: 170px;
       border-radius: var(--pillRadius);
@@ -192,14 +248,16 @@
       justify-content:flex-end;
       padding: 10px 10px 12px;
     }
- #msPlayer \.pill:active{ transform: translateY(1px); }
- #msPlayer \.pill:focus-visible{
+
+    .pill:active{ transform: translateY(1px); }
+
+    .pill:focus-visible{
       outline: 2px solid rgba(241,209,122,.65);
       outline-offset: 2px;
     }
 
     /* glowing outer ring look */
- #msPlayer \.pill::before{
+    .pill::before{
       content:"";
       position:absolute;
       inset: 7px;
@@ -209,11 +267,12 @@
       transition: border-color .12s ease, box-shadow .12s ease;
       pointer-events:none;
     }
- #msPlayer \.pill.active::before{
+    .pill.active::before{
       border-color: var(--ringOn);
       box-shadow: 0 0 28px rgba(241,209,122,.18), 0 0 0 1px rgba(241,209,122,.10);
     }
- #msPlayer \.pill .window{
+
+    .pill .window{
       position:absolute;
       left:10px; right:10px;
       top:10px;
@@ -231,7 +290,7 @@
     }
 
     /* the "ball" that appears for Fairway/Sand/Green */
- #msPlayer \.ball{
+    .ball{
       width: 30px;
       height: 30px;
       border-radius: 50%;
@@ -244,13 +303,13 @@
       transition: opacity .10s ease, transform .10s ease;
       pointer-events:none;
     }
- #msPlayer \.pill.active .ball{
+    .pill.active .ball{
       opacity:1;
       transform: translateY(0) scale(1);
     }
 
     /* label bar at the bottom (like your screenshot) */
- #msPlayer \.labelBar{
+    .labelBar{
       margin-top:auto;
       border-radius: 12px;
       border:1px solid rgba(255,255,255,.12);
@@ -265,12 +324,12 @@
     }
 
     /* PUTTS special: flag + number; ring lights when putts>0 */
- #msPlayer \.putts .flagWrap{
+    .putts .flagWrap{
       position:relative;
       width: 56px;
       height: 66px;
     }
- #msPlayer \.putts .pole{
+    .putts .pole{
       position:absolute;
       left: 11px;
       top: 8px;
@@ -280,7 +339,7 @@
       background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(255,255,255,.25));
       box-shadow: 0 6px 12px rgba(0,0,0,.30);
     }
- #msPlayer \.putts .flag{
+    .putts .flag{
       position:absolute;
       left: 16px;
       top: 10px;
@@ -298,13 +357,13 @@
       font-size: 14px;
       line-height:1;
     }
- #msPlayer \.putts .flag.white { background: rgba(255,255,255,.75); color: rgba(0,0,0,.70); }
- #msPlayer \.putts .flag.gold  { background: linear-gradient(180deg, var(--gold), var(--gold2)); color:#120f07; }
- #msPlayer \.putts .flag.green { background: linear-gradient(180deg, #78f0a5, var(--green)); color:#062014; }
- #msPlayer \.putts .flag.red   { background: linear-gradient(180deg, #ff8a8a, var(--red)); color:#1b0606; }
+    .putts .flag.white { background: rgba(255,255,255,.75); color: rgba(0,0,0,.70); }
+    .putts .flag.gold  { background: linear-gradient(180deg, var(--gold), var(--gold2)); color:#120f07; }
+    .putts .flag.green { background: linear-gradient(180deg, #78f0a5, var(--green)); color:#062014; }
+    .putts .flag.red   { background: linear-gradient(180deg, #ff8a8a, var(--red)); color:#1b0606; }
 
     /* second row pills can show icons later; for now a simple glyph */
- #msPlayer \.iconGlyph{
+    .iconGlyph{
       width: 54px;
       height: 50px;
       border-radius: 18px;
@@ -317,14 +376,16 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
       opacity:.9;
     }
- #msPlayer \.subNote{
+
+    .subNote{
       margin-top: 8px;
       padding: 8px 0 0;
       font-size: 12px;
       opacity:.78;
       line-height:1.35;
     }
- #msPlayer \.kbd{
+
+    .kbd{
       display:inline-block;
       padding: 2px 8px;
       border-radius: 999px;
@@ -338,27 +399,29 @@
 
     /* Make it fit on smaller screens (390x844 target) */
     @media (max-width: 380px){
-      #msPlayer{ --pillGap: 9px; --edgePad: 0px; }
- #msPlayer \.pill{ height: 160px; }
- #msPlayer \.pill .window{ height: 112px; }
- #msPlayer \.labelBar{ font-size: 14px; }
+      :root{ --pillGap: 9px; --edgePad: 0px; }
+      .pill{ height: 160px; }
+      .pill .window{ height: 112px; }
+      .labelBar{ font-size: 14px; }
     }
   
 
     /* --- Top layout revisions --- */
- #msPlayer \.metaRow{
+    .metaRow{
       margin-top: 8px;
       display:grid;
       grid-template-columns: 1fr; /* full width */
       gap: 10px;
       align-items:center;
     }
- #msPlayer \.honorsWrap{
+
+    .honorsWrap{
       display:flex;
       justify-content:center;
       margin-top: 8px;
     }
- #msPlayer \.honors{
+
+    .honors{
       width: 75%;
       max-width: 320px;
       border-radius: 14px;
@@ -376,7 +439,8 @@
       cursor:pointer;
       -webkit-tap-highlight-color: transparent;
     }
- #msPlayer \.honors::before{
+
+    .honors::before{
       content:"";
       position:absolute;
       inset: 6px;
@@ -385,12 +449,13 @@
       transition: border-color .15s ease, box-shadow .15s ease;
       pointer-events:none;
     }
- #msPlayer \.honors.active{
+
+    .honors.active{
       color: var(--gold);
       text-shadow: 0 0 18px rgba(241,209,122,.22);
       animation: honorsPulse 1.1s ease-in-out infinite;
     }
- #msPlayer \.honors.active::before{
+    .honors.active::before{
       border-color: rgba(241,209,122,.62);
       box-shadow: 0 0 26px rgba(241,209,122,.16);
     }
@@ -401,7 +466,7 @@
     }
 
     /* --- Combined player + stepper bar --- */
- #msPlayer \.playerRow{
+    .playerRow{
       margin-top: 8px;
       display:grid;
       grid-template-columns: 1fr; /* one combined bar */
@@ -427,7 +492,8 @@
       font-size: 18px;
       line-height: 1.05;
     }
- #msPlayer \.scoreMini{
+
+    .scoreMini{
       padding: 0;
       border: none;
       background: transparent;
@@ -435,24 +501,27 @@
       gap: 8px;
       justify-content:flex-end;
     }
- #msPlayer \.miniBtn{
+
+    .miniBtn{
       width: 42px;
       height: 42px;
       border-radius: 12px;
     }
- #msPlayer \.miniScore{
+
+    .miniScore{
       width: 42px;
       font-size: 18px;
     }
 
     /* --- Finalize / Confirm button --- */
- #msPlayer \.finalizeWrap{
+    .finalizeWrap{
       margin-top: 10px;
       display:flex;
       justify-content:center;
       padding: 0 12px;
     }
- #msPlayer \.finalizeBtn{
+
+    .finalizeBtn{
       width: 75%;
       max-width: 320px;
       border-radius: 14px;
@@ -470,7 +539,7 @@
       user-select:none;
       position:relative;
     }
- #msPlayer \.finalizeBtn::before{
+    .finalizeBtn::before{
       content:"";
       position:absolute;
       inset: 6px;
@@ -479,27 +548,27 @@
       pointer-events:none;
       transition: border-color .15s ease, box-shadow .15s ease;
     }
- #msPlayer \.finalizeBtn.confirm{
+    .finalizeBtn.confirm{
       color: var(--gold);
     }
- #msPlayer \.finalizeBtn.confirm::before{
+    .finalizeBtn.confirm::before{
       border-color: rgba(241,209,122,.62);
       box-shadow: 0 0 26px rgba(241,209,122,.16);
     }
- #msPlayer \.finalizeBtn:active{ transform: translateY(1px); }
+    .finalizeBtn:active{ transform: translateY(1px); }
 
     /* --- Bottom nav (4 square buttons) --- */
- #msPlayer \.nav{
+    .nav{
       border-top:1px solid rgba(255,255,255,.06);
       background: rgba(0,0,0,.28);
       padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
     }
- #msPlayer \.navGrid{
+    .navGrid{
       display:grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 8px;
     }
- #msPlayer \.navBtn{
+    .navBtn{
       height: 50px;
       border-radius: 14px;
       border:1px solid rgba(255,255,255,.12);
@@ -517,128 +586,85 @@
       -webkit-tap-highlight-color: transparent;
       user-select:none;
     }
- #msPlayer \.navBtn .ico{
+    .navBtn .ico{
       font-size: 18px;
       opacity:.95;
       line-height: 1;
     }
- #msPlayer \.navBtn .txt{
+    .navBtn .txt{
       font-size: 11px;
       opacity:.85;
       text-transform: uppercase;
       letter-spacing:.12em;
     }
- #msPlayer \.navBtn.active{
+    .navBtn.active{
       color: var(--gold);
       text-shadow: 0 0 18px rgba(241,209,122,.20);
     }
 
     /* make room: reduce bottom padding in .bottom since nav exists */
- #msPlayer \.bottom{
+    .bottom{
       padding: 8px 16px 10px;
     }
 
     /* --- Shrink lower (tool) pills ~25% so screen doesn't scroll --- */
- #msPlayer \.pill.tool{
+    .pill.tool{
       height: 128px; /* 170 * 0.75 */
       padding: 10px 10px 10px;
     }
- #msPlayer \.pill.tool .window{
+    .pill.tool .window{
       height: 80px;
       border-radius: 16px;
     }
- #msPlayer \.pill.tool .labelBar{
+    .pill.tool .labelBar{
       padding: 8px 8px;
       font-size: 14px;
     }
 
-  
+  </style>
 
-/* ---- Production container wrapper ---- */
-#msPlayer{
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 14px 14px calc(18px + env(safe-area-inset-bottom));
-}
-#msPlayer .hero{
-  background:
-    linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15)),
-    url('/assets/img/hero.png') center/cover no-repeat;
-  position: relative;
-}
-#msPlayer .hero::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: radial-gradient(240px 120px at 50% 20%, rgba(241,209,122,.10), transparent 60%);
-  border-radius: 18px;
-  pointer-events:none;
-}
-#msPlayer .heroLogo{
-  position:absolute;
-  left: 14px;
-  bottom: 10px;
-  height: 38px;
-  width: auto;
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,.45));
-}
-#msPlayer .heroTitle{
-  position:absolute;
-  right: 14px;
-  bottom: 12px;
-  font-weight: 950;
-  letter-spacing: .14em;
-  font-size: 12px;
-  opacity: .92;
-  text-transform: uppercase;
-}
+  <style id="ms-games-css">
 
-  
-/* === PROD V4 overrides (Player screen) === */
-/* Remove any accidental floating logo / debug overlays */
-.floatingLogo, .cornerLogo, .miniLogo, .tinyLogo, .msFloatingLogo, .msCornerLogo,
-#msFloatingLogo, #msCornerLogo, .ms-watermark, .watermark, .devBadge, .debugBadge,
-.gamesDock, .gameDock, .gamePillsDock, .gamePills, .gamesPills, .chipsRow, .chipRow,
-.msGames, .msGamePills, .msPills, .pillsDock, .pillsRow {
-  display: none !important;
-}
+    /* ===== Active Games (8-slot indicator) ===== */
+.gameSq{
+      height: 30px;
+      border-radius: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 950;
+      letter-spacing: .06em;
+      font-size: 11px;
+      color: rgba(255,255,255,.70);
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
+      user-select:none;
+    }
+    .gameSq.on{
+      color: rgba(255,255,255,.92);
+      border-color: rgba(241,209,122,.28);
+      background: rgba(241,209,122,.10);
+      box-shadow: 0 0 0 1px rgba(241,209,122,.08) inset;
+    }
 
-/* Keep only ONE brand mark on player screen: shrink the header logo so it doesn't compete */
-.heroLogo{
-  height: 22px !important;
-  max-height: 22px !important;
-  width: auto !important;
-  opacity: 0.95 !important;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,.6)) !important;
-}
+  </style>
 
-/* Tighten hero header spacing a touch */
-.hero{
-  padding-top: 10px !important;
-  padding-bottom: 8px !important;
-}
-.heroTitle{
-  letter-spacing: .08em !important;
-}
-
-</style>
+  <meta name="ms-build" content="PLAYER_PROD_V5_CLEAN_2026-02-13" />
 </head>
 <body>
-  <div id="msPlayer">
+  <div id="msIsoStage">
 
 <div aria-label="MaxSkins Player Screen" class="phone" data-ms-player="1">
 <!-- TOP HALF (placeholders; we will skin with real images later) -->
 <section aria-label="Top HUD" class="top">
-<div aria-label="Hero" class="hero"><img class="heroLogo" src="/assets/img/MSG_LOGO.png" alt="MaxSkins Golf" /><div class="heroTitle">Player</div></div>
+<div aria-label="Hero" class="hero" style="background:url('/assets/img/hero.png') center/cover no-repeat; position:relative;"><img src="/assets/img/MSG_LOGO.png" alt="MaxSkins Golf" style="position:absolute;left:14px;bottom:10px;height:38px;width:auto;filter:drop-shadow(0 10px 20px rgba(0,0,0,.45));" /><div style="position:absolute;right:14px;bottom:12px;font-weight:950;letter-spacing:.14em;font-size:12px;opacity:.92;text-transform:uppercase;">PLAYER</div></div>
 <div class="metaRow"><div aria-label="Hole info" class="holePill">
 <span>HOLE <strong id="holeNum">6</strong></span>
 <span>PAR <strong id="holePar">4</strong></span>
 </div></div><div class="honorsWrap"><div class="honors" id="honorsPill">HONORS</div></div>
-<div class="playerRow"><div class="playerBar"><div><div class="name" id="playerName">Player 1</div></div><div aria-label="Quick score adjust" class="scoreMini">
+<div class="playerRow"><div class="playerBar"><div><div class="name" id="playerName">John Smith</div></div><div aria-label="Quick score adjust" class="scoreMini">
 <button aria-label="Decrease score" class="miniBtn" id="scoreMinus">−</button>
-<div aria-live="polite" class="miniScore" id="scoreVal">0</div>
+<div aria-live="polite" class="miniScore" id="scoreVal">&nbsp;</div>
 <button aria-label="Increase score" class="miniBtn" id="scorePlus">+</button>
 </div></div></div>
 </section>
@@ -699,229 +725,24 @@
 <div class="labelBar">Green AI</div>
 </button>
 </div>
-<div class="finalizeWrap"><button aria-label="Finalize Score" class="finalizeBtn" id="finalizeBtn" type="button">Submit Score</button></div><div class="subNote"><span class="kbd">Tap</span> Fairway / Sand / Green toggles. <span class="kbd">Tap</span> Putts cycles 0→9. <span class="kbd">Hold 1s</span> Putts resets.</div>
+<div class="finalizeWrap"><button aria-label="Finalize Score" class="finalizeBtn" id="finalizeBtn" type="button">Submit Score</button></div><div class="subNote">
+<span class="kbd">Tap</span> Fairway / Sand / Green to toggle the ball + ring.
+        <span class="kbd">Tap</span> Putts to cycle 0→9 (3+ stays red). <span class="kbd">Hold 1s</span> Putts to reset to 0.
+      </div>
 </section><section aria-label="Bottom navigation" class="nav"><div class="navGrid"><button aria-label="Home" class="navBtn" id="navHome" type="button"><div class="ico">🏠</div><div class="txt">Home</div></button><button aria-label="Scores" class="navBtn" id="navScores" type="button"><div class="ico">📊</div><div class="txt">Scores</div></button><button aria-label="Rules" class="navBtn" id="navRules" type="button"><div class="ico">⚖️</div><div class="txt">Rules</div></button><button aria-label="Money" class="navBtn" id="navMoney" type="button"><div class="ico">💰</div><div class="txt">Money</div></button></div></section>
 </div>
-<script>
-    // -----------------------------
-    // Score mini controls (placeholder)
-    // -----------------------------
-    (function(){
-      const minus = document.getElementById('scoreMinus');
-      const plus  = document.getElementById('scorePlus');
-      const valEl = document.getElementById('scoreVal');
-
-      // Score starts BLANK (0 is reserved for quitting a round).
-      // Tap + to set 1..99. Tap - to decrease; when it would hit 0, it clears back to blank.
-      let score = null;
-
-      function render(){
-        if (score === null) { valEl.textContent = ''; valEl.setAttribute('data-empty','1'); return; }
-        valEl.textContent = String(score);
-        valEl.removeAttribute('data-empty');
-      }
-
-      minus.addEventListener('click', () => {
-        if (score === null) return;
-        if (score <= 1) { score = null; render(); return; }
-        score = Math.max(1, score - 1);
-        render();
-      });
-
-      plus.addEventListener('click', () => {
-        if (score === null) { score = 1; render(); return; }
-        score = Math.min(99, score + 1);
-        render();
-      });
-
-      render();
-    })();
-
-    // -----------------------------
-    // Toggle pills (Fairway/Sand/Green) can all be ON together.
-    // Ball appears + ring glows.
-    // -----------------------------
-    function wireTogglePill(btn){
-      btn.addEventListener('click', () => {
-        const on = !btn.classList.contains('active');
-        btn.classList.toggle('active', on);
-        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
-    }
-    wireTogglePill(document.getElementById('pillFairway'));
-    wireTogglePill(document.getElementById('pillSand'));
-    wireTogglePill(document.getElementById('pillGreen'));
-
-    // -----------------------------
-    // Putts pill:
-    // - Tap cycles 0..9, then loops
-    // - 0 => white (neutral), no number shown
-    // - 1 => gold, number 1
-    // - 2 => green, number 2
-    // - 3..9 => red, number
-    // - Ring glows when putts > 0
-    // - Hold 1s => reset to 0 (prevents "fat finger" pain without adding a reset button)
-    // -----------------------------
-    (function(){
-      const pill = document.getElementById('pillPutts');
-      const flag = document.getElementById('puttFlag');
-      const num  = document.getElementById('puttNum');
-
-      let putts = 0;
-
-      function setFlagClass(cls){
-        flag.classList.remove('white','gold','green','red');
-        flag.classList.add(cls);
-      }
-
-      function render(){
-        if (putts === 0){
-          setFlagClass('white');
-          num.textContent = '';
-          pill.classList.remove('active'); // ring off
-          pill.setAttribute('aria-label', 'Putts (neutral). Tap to set putts. Hold 1s to reset.');
-        } else if (putts === 1){
-          setFlagClass('gold');
-          num.textContent = '1';
-          pill.classList.add('active'); // ring on
-          pill.setAttribute('aria-label', 'Putts: 1 (gold). Tap to change. Hold 1s to reset.');
-        } else if (putts === 2){
-          setFlagClass('green');
-          num.textContent = '2';
-          pill.classList.add('active');
-          pill.setAttribute('aria-label', 'Putts: 2 (green). Tap to change. Hold 1s to reset.');
-        } else {
-          setFlagClass('red');
-          num.textContent = String(putts);
-          pill.classList.add('active');
-          pill.setAttribute('aria-label', 'Putts: ' + putts + ' (red). Tap to change. Hold 1s to reset.');
-        }
-      }
-
-      function increment(){
-        putts = (putts + 1) % 10; // 0..9 loop
-        render();
-      }
-
-      function reset(){
-        putts = 0;
-        render();
-      }
-
-      let holdTimer = null;
-      let held = false;
-
-      pill.addEventListener('pointerdown', (e) => {
-        held = false;
-        // Start hold-to-reset timer
-        holdTimer = window.setTimeout(() => {
-          held = true;
-          reset();
-          // prevent accidental click after hold on some browsers
-        }, 1000);
-      });
-
-      function clearHold(){
-        if (holdTimer){
-          clearTimeout(holdTimer);
-          holdTimer = null;
-        }
-      }
-
-      pill.addEventListener('pointerup', (e) => {
-        clearHold();
-        if (!held){
-          increment();
-        }
-      });
-
-      pill.addEventListener('pointercancel', clearHold);
-      pill.addEventListener('pointerleave', clearHold);
-
-      // Also support keyboard
-      pill.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' '){
-          e.preventDefault();
-          increment();
-        }
-        if (e.key === 'Backspace' || e.key === 'Escape'){
-          e.preventDefault();
-          reset();
-        }
-      });
-
-      render();
-    })();
-
-    // -----------------------------
-    // Row 2 placeholder actions (we'll wire later)
-    // -----------------------------
-    document.getElementById('pillPenalty').addEventListener('click', () => alert('Penalty (wire later)'));
-    document.getElementById('pillNotes').addEventListener('click', () => alert('Notes (wire later)'));
-    document.getElementById('pillFairwayAI').addEventListener('click', () => alert('Fairway AI (wire later)'));
-    document.getElementById('pillGreenAI').addEventListener('click', () => alert('Green AI (wire later)'));
-  
-
-    // -----------------------------
-    // Honors pill: tap to toggle "has honors" (demo behavior).
-    // In production, scorer/round state will control this.
-    // -----------------------------
-    (function(){
-      const honors = document.getElementById('honorsPill');
-      if (!honors) return;
-      honors.addEventListener('click', () => {
-        honors.classList.toggle('active');
-      });
-    })();
-
-    // -----------------------------
-    // Finalize Score: two-tap safety
-    // Tap 1 => "Confirm"
-    // Tap 2 => send to scorekeeper (placeholder), then revert
-    // -----------------------------
-    (function(){
-      const btn = document.getElementById('finalizeBtn');
-      if (!btn) return;
-      let armed = false;
-      let timer = null;
-
-      function disarm(){
-        armed = false;
-        btn.classList.remove('confirm');
-        btn.textContent = 'Finalize Score';
-        if (timer){ clearTimeout(timer); timer = null; }
-      }
-
-      btn.addEventListener('click', () => {
-        if (!armed){
-          armed = true;
-          btn.classList.add('confirm');
-          btn.textContent = 'Confirm';
-          // auto-cancel if user doesn’t confirm quickly
-          timer = setTimeout(disarm, 4000);
-          return;
-        }
-        // second tap = "send"
-        disarm();
-        alert('Sent to scorekeeper (wire later)');
-      });
-    })();
-
-    // -----------------------------
-    // Bottom nav: simple active state (placeholder)
-    // -----------------------------
-    (function(){
-      const ids = ['navHome','navScores','navRules','navMoney'];
-      const btns = ids.map(id => document.getElementById(id)).filter(Boolean);
-      function setActive(id){
-        btns.forEach(b => b.classList.toggle('active', b.id === id));
-      }
-      btns.forEach(b => b.addEventListener('click', () => setActive(b.id)));
-      setActive('navHome');
-    })();
-</script>
+<script src="/assets/js/main.js"></script>
 
   </div>
-  <script src="/assets/js/main.js"></script>
+<div class="gameSq" data-game="kp" title="KP / Closest-to-the-Pin">KP</div>
+          <div class="gameSq" data-game="birdie" title="Birdie Pot">B</div>
+          <div class="gameSq" data-game="nassau" title="Nassau">N</div>
+          <div class="gameSq" data-game="press" title="Presses">PR</div>
+          <div class="gameSq" data-game="deucepot" title="Deuce Pot">2</div>
+          <div class="gameSq" data-game="eagle" title="Eagle Pot">E</div>
+          <div class="gameSq" data-game="custom" title="Custom / TBD">+</div>
+        </div>
+      </div>
+
 </body>
 </html>
